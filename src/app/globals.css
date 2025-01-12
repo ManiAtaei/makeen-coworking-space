@@ -7,3 +7,47 @@
   --foreground: #171717;
 }
 
+@font-face {
+  font-family: "x-black";
+  src: url("/fonts/IRANSansXFaNum/IRANSansXFaNum-Black.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "x-bold";
+  src: url("/fonts/IRANSansXFaNum/IRANSansXFaNum-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "x-demiBold";
+  src: url("/fonts/IRANSansXFaNum/IRANSansXFaNum-DemiBold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "x-extraBold";
+  src: url("/fonts/IRANSansXFaNum/IRANSansXFaNum-ExtraBold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "x-light";
+  src: url("/fonts/IRANSansXFaNum/IRANSansXFaNum-Light.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "x-medium";
+  src: url("/fonts/IRANSansXFaNum/IRANSansXFaNum-Medium.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "x-regular";
+  src: url("/fonts/IRANSansXFaNum/IRANSansXFaNum-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "x-thin";
+  src: url("/fonts/IRANSansXFaNum/IRANSansXFaNum-Thin.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "x-ultraLight";
+  src: url("/fonts/IRANSansXFaNum/IRANSansXFaNum-UltraLight.ttf") format("truetype");
+}
