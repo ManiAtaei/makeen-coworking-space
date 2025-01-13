@@ -10,6 +10,7 @@ export default {
     screens :{
       mobile : "380px",
       mobileNum: "500px",
+      header:"560px",
       sm : "640px",
       md: "768px",
       lg: "1024px",
