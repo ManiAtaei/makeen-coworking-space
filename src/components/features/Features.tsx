@@ -4,7 +4,7 @@ export default function Features() {
   const features = [
     {
       id: 1,
-      image: "/iconLanding/Cheap.svg",
+      image: "/iconLanding/Vector.svg",
       title: " قیمت مناسب ",
       res : "block"
     },
