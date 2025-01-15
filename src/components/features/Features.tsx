@@ -53,7 +53,7 @@ export default function Features() {
   ];
 
   return (
-    <div className="relative h-[466px]">
+    <div className="relative mt-[-10px]">
       <div className="flex flex-col items-center gap-4 ">
         <h1 className="text-2xl font-xbold mt-10"> امکانات مکین </h1>
         <div dir="ltr" className="grid-cols-2 grid-rows-2 md:grid-cols-3  grid lg:grid-cols-4  gap-4 mobileNum:gap-10 lg:gap-4">

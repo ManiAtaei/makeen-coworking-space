@@ -19,10 +19,10 @@ export default function Header() {
               ساخته‌ایم تا فراتر از یک محیط کار، در کنار هم رشد کنیم.
             </p>
           </div>
-          <div className="flex items-center mx-auto w-5/6 mb-5 mt-4 containerPage:mb-0 md:mt-10 mobileNum:gap-[40px] header:gap-0 header:w-auto sm:flex sm:justify-between sm:items-center md:flex md:items-center shadow-lg lg:pr-1 bg-white rounded-[8px] z-10">
+          <div className="flex items-center mx-auto w-11/12 mb-5 mt-4 containerPage:mb-0 md:mt-10 mobileNum:gap-[40px] header:gap-0 header:w-auto sm:flex sm:justify-between sm:items-center md:flex md:items-center shadow-lg lg:pr-1 bg-white rounded-[8px] z-10">
             <details className="dropdown ">
-              <summary className="btn text-[11px] lg:mr-1 bg-white border-l-[2px] hover:bg-white shadow-none border-none mobileNum:text-[12.5px] sm:text-[13.5px] header:text-[10px] font-xregular text-[#404040]">
-                <div className="flex items-center gap-2 mobileNum:gap-4 leading-5">
+              <summary className="btn text-[10px] lg:mr-1 bg-white border-l-[2px] hover:bg-white shadow-none border-none mobileNum:text-[12.5px] sm:text-[13.5px] header:text-[11px] font-xregular text-[#404040]">
+                <div className="flex items-center gap-2 mobileNum:gap-3 leading-5">
                   نوع اشتراک را انتخاب نمایید
                   <HiOutlineChevronDown className="w-6 h-6" />
                 </div>
@@ -37,8 +37,8 @@ export default function Header() {
               </ul>
             </details>
             <details className="dropdown">
-              <summary className="btn text-[11px] lg:mr-1 flex items-center hover:bg-white  bg-white shadow-none border-none mobileNum:text-[12.5px] sm:text-[13.5px] header:text-[10px] font-xregular text-[#404040]">
-                <div className="flex items-center gap-2 mobileNum:gap-4 leading-5">
+              <summary className="btn text-[10px] lg:mr-1 flex items-center hover:bg-white  bg-white shadow-none border-none mobileNum:text-[12.5px] sm:text-[13.5px] header:text-[11px] font-xregular text-[#404040]">
+                <div className="flex items-center gap-2 mobileNum:gap-3 leading-5">
                   تاریخ را انتخاب نمایید
                   <HiOutlineChevronDown className="w-6 h-6" />
                 </div>
