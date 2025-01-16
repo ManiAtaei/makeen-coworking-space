@@ -46,12 +46,12 @@ export default function Navbar() {
             <span className="text-[16px] font-xmedium"> ۰۲۱-۷۷۱۸۸۱۸۵-۶ </span>
           </div>
 
-          <div className="hidden lg:block text-[#44C0ED] text-[16px] font-xmedium lg:flex lg:items-center gap-1">
+          <button className="hidden lg:block text-[#44C0ED] text-[16px] font-xmedium lg:flex lg:items-center gap-1">
             <img src="/iconLanding/profileBlue.svg" alt="" />
             <span> ورود / عضویت </span>
-          </div>
+          </button>
 
-          <div className="lg:hidden">
+          <div className="pl-5 lg:hidden">
             <button
               onClick={hamberger}
               className=" h-[38px] w-[38px] border-[1px] rounded-[8px] bg-white hover:bg-gray-100 border-solid border-[#D1D5D8] p-2"
