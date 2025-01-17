@@ -1,6 +1,7 @@
 import CommonQuestion from "@/components/commonQuestion/CommonQuestion";
 import Container from "@/components/container/Container";
 import Features from "@/components/features/Features";
+import Footer from "@/components/footer/Footer";
 import Header from "@/components/header/Header";
 import Introduction from "@/components/introduction/Introduction";
 import Map from "@/components/map/Map";
@@ -18,6 +19,7 @@ export default function Home() {
         <Reviews />
         <CommonQuestion />
         <Map />
+        <Footer />
       </Container>
     </div>
   );
