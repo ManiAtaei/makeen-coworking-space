@@ -1,3 +1,4 @@
+import CommonQuestion from "@/components/commonQuestion/CommonQuestion";
 import Container from "@/components/container/Container";
 import Features from "@/components/features/Features";
 import Header from "@/components/header/Header";
@@ -12,8 +13,9 @@ export default function Home() {
         <Header />
         <Features />
         <Services />
-        <Introduction />
+        {/* <Introduction /> */}
         <Reviews />
+        <CommonQuestion />
       </Container>
     </div>
   );
