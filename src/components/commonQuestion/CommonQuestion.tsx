@@ -2,9 +2,9 @@
 import React, { useState } from "react";
 
 export default function CommonQuestion() {
-  const [openAccordion, setOpenAccordion] = useState(null);
+  const [openAccordion, setOpenAccordion] = useState<number | null>(null);
 
-  const toggleAccordion = (id) => {
+  const toggleAccordion = (id: number) => {
     setOpenAccordion(openAccordion === id ? null : id);
   };
 
