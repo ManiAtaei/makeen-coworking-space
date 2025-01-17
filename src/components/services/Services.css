@@ -1,6 +1,4 @@
- 
-  
-  
+
   .swiper-pagination {
     position:static;
     top: 10px;
@@ -9,13 +7,13 @@
     .swiper-pagination-bullet {
       width: 16px;
       height:5px;
-      background: #c9c7c7; /* رنگ دایره‌ها */
+      background: #DFDFDF;
       opacity: 0.8;
       border-radius: 25%;
-      margin: 0 5px; /* فاصله بین دایره‌ها */
+      margin: 0 5px;
     }
     
     .swiper-pagination-bullet-active {
-      background: #056e24; /* رنگ دایره فعال */
+      background: #ADADAD;
     }
     

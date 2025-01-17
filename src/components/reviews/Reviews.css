@@ -1,0 +1,55 @@
+.swipper2 {
+  width: 100%;
+  position: relative;
+  overflow: visible; /* اجازه می‌دهد محتوا از محدودۀ والد خارج شود */
+}
+
+@media (max-width: 1280px) {
+  .swipper2 .swiper-button-next,
+  .swipper2 .swiper-button-prev {
+    display: none;
+  }
+  .swipper2 .swiper-pagination{
+    display: none;
+  }
+}
+
+.swipper2 .swiper-button-next::after,
+.swipper2 .swiper-button-prev::after {
+  content: "" !important;
+}
+
+.swipper2 .swiper-button-next {
+  position: absolute;
+  top: 45%;
+  left: -60px !important; /* جابجایی به سمت بیرون */
+  background: url("/iconLanding/Vectorprev.svg") no-repeat center;
+  background-size: contain;
+}
+
+.swipper2 .swiper-button-prev {
+  position: absolute;
+  top: 45%;
+  right: -60px !important; /* جابجایی به سمت بیرون */
+  background: url("/iconLanding/Vectornext.svg") no-repeat center;
+  background-size: contain;
+}
+
+.swipper2 .swiper-pagination {
+    position: absolute;
+    bottom: 20px; 
+  }
+  
+
+.swiper-pagination-bullet {
+  width: 16px;
+  height: 5px;
+  background: #dfdfdf;
+  opacity: 0.8;
+  border-radius: 25%;
+  margin: 0 5px;
+}
+
+.swiper-pagination-bullet-active {
+  background: #adadad;
+}
