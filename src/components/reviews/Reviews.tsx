@@ -51,7 +51,7 @@ export default function Reviews() {
 
   return (
     <div className="bg-[#F4F5FC]">
-      <div className="mr-5 ml-5 xl:mx-[87px] ">
+      <div className="mr-5 ml-5 mt-8 xl:mx-[87px] ">
         <h1 className="text-[15px] text-[#253359] font-xbold lg:text-[20px] pb-5 lg:text-center">
           نظر کاربران مکین
         </h1>
