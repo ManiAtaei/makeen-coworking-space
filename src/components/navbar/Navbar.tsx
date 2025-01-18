@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import React, { useState } from "react";
 import { FiPhoneCall } from "react-icons/fi";
 
@@ -35,7 +36,7 @@ export default function Navbar() {
           <img src="/imageLanding/logo-makeen.svg" alt="img" />
           <ul className="hidden titleNav:flex text-[#404040] text-[16px] titleNav:block font-xmedium gap-8">
             <li> صفحه اصلی </li>
-            <li> تماس باما </li>
+            <Link href="contactUs"><li> تماس باما </li></Link>
             <li> سیاست ها و قوانین </li>
           </ul>
         </div>

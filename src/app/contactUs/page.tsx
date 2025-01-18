@@ -1,0 +1,46 @@
+import React from "react";
+
+export default function AboutUs() {
+  return (
+    <div className="mt-[80px] relative ">
+      <img className="w-screen sm:hidden" src="/imageLanding/HeroMobile.svg" alt="img" />
+      <img className="w-screen hidden sm:block max-w-[1440px] mx-auto" src="/imageLanding/Hero.svg" alt="img" />
+      
+      <div className="flex flex-col sm:flex sm:flex-row sm:justify-center gap-2 xl:gap-8 absolute top-[100px] px-5 mobile:top-32 w-full mobileNum:top-36 header:top-40 sm:top-[150px] lg:px-[70px] titleNav:top-[200px] xl:top-[250px] containerPage:top-[280px] ">
+        <div className="sm:order-1 flex items-center sm:flex sm:flex-col sm:rounded-r-lg sm:rounded-tl-none sm:pr-0 sm:pl-2 sm:w-1/3 xl:w-3/12 shadow-[0_8px_15px_#63666714,0_0px_4px_#63666714] shadow-lg pr-4 py-[18px] bg-white rounded-t-2xl ">
+          <img
+            className="md:w-[50px] md:h-[50px] "
+            src="/iconLanding/Location-Outline.svg"
+            alt="img"
+          />
+          <span className="text-[#202020] text-[12px] header:text-[14px] xl:text-[18px] font-xbold pr-2 sm:py-2">
+            آدرس :
+          </span>
+          <p className="pr-2 text-[#404040] text-[12px] header:text-[14px] font-xregular xl:text-[16px] xl:font-xmedium w-4/6 sm:w-full sm:text-center md:w-10/12 leading-[18px]">
+            تهران، مترو علم صنعت، خیابان سلیمانی، مدائن پلاک 520
+          </p>
+        </div>
+
+        <div className="flex sm:order-3 items-center sm:flex sm:flex-col sm:pr-0 sm:rounded-l-lg sm:w-1/3 xl:w-3/12 shadow-[0_8px_15px_#63666714,0_8px_15px_#63666714] shadow-lg pr-4 py-[18px]  bg-white">
+          <img className="md:w-[50px] md:h-[50px]" src="/iconLanding/call-calling.svg" alt="img" />
+          <span className="text-[#202020] text-[12px] header:text-[14px] xl:text-[18px] font-xbold pr-2 sm:py-2">
+            تلفن :
+          </span>
+          <p className="pr-2 text-[#404040] sm:hidden text-[12px] header:text-[14px] font-xregular"> 021-77188185-۶٬۰۹۱۲۱۲۳۴۵۶۷ </p>
+          <p className="pr-2 text-[#404040] hidden sm:block text-[12px] header:text-[14px] font-xregular xl:text-[16px] xl:font-xmedium"> 021-77188185-۶ </p>
+          <p className="pr-2 text-[#404040] hidden sm:block text-[12px] header:text-[14px] font-xregular xl:text-[16px] xl:font-xmedium"> ۰۹۱۲۱۲۳۴۵۶۷ </p>
+        </div>
+
+        <div className="flex sm:order-2 items-center sm:flex sm:flex-col sm:pr-0 sm:rounded-b-none sm:w-1/3 xl:w-3/12 shadow-[0_8px_15px_#63666714,0_8px_15px_#63666714] shadow-lg pr-4 py-[18px]  bg-white rounded-b-2xl">
+          <img className="md:w-[50px] md:h-[50px]" src="/iconLanding/Email-Outline.svg" alt="img" />
+          <span className="text-[#202020] text-[12px] header:text-[14px] xl:text-[18px]  font-xbold pr-2 sm:py-2">
+            ایمیل :
+          </span>
+          <p className="pr-2 text-[#404040] text-[12px] header:text-[14px] xl:text-[16px] xl:font-xmedium font-xregular">
+            Makeen@gmail.com
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
