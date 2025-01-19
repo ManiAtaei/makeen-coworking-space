@@ -26,7 +26,7 @@ export default function Location() {
   ];
 
   return (
-    <div className="mt-[-40px] bg-[#253359] px-5 md:px-8 pt-5 md:pt-8">
+    <div className="mt-[-40px] bg-[#253359] px-5 md:px-8 pt-5 md:pt-8 md:mb-12">
       <div className="md:flex md:flex-row-reverse md:justify-between">
         <img
           className="pb-5 w-full md:hidden"
@@ -39,7 +39,7 @@ export default function Location() {
           alt="img"
         />
 
-        <div className="w-[29%]">
+        <div className="md:w-[29%]">
         <div className="flex items-center pb-4">
           <img src="/iconLanding/arrow-left.svg" alt="img" />
           <h1 className="text-white text-[16px] font-xbold ">

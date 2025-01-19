@@ -19,7 +19,6 @@ export default function Home() {
         <Reviews />
         <CommonQuestion />
         <Map />
-        <Footer />
       </Container>
     </div>
   );
