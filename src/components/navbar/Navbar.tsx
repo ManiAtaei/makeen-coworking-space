@@ -35,7 +35,7 @@ export default function Navbar() {
         <div className="flex items-center gap-16">
           <img src="/imageLanding/logo-makeen.svg" alt="img" />
           <ul className="hidden titleNav:flex text-[#404040] text-[16px] titleNav:block font-xmedium gap-8">
-            <li> صفحه اصلی </li>
+            <Link href="/"><li> صفحه اصلی </li></Link>
             <Link href="contactUs"><li> تماس باما </li></Link>
             <li> سیاست ها و قوانین </li>
           </ul>
