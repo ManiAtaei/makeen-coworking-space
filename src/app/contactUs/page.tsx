@@ -1,5 +1,4 @@
 import Container from "@/components/container/Container";
-import Footer from "@/components/footer/Footer";
 import HeaderContact from "@/components/headerContact/HeaderContact";
 import Location from "@/components/locationContact/Location";
 import React from "react";
