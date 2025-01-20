@@ -117,7 +117,7 @@ export default function Reviews() {
           {reviews.map((item) => (
             <SwiperSlide key={item.id}>
               <div className="bg-white mt-[13px] pr-4 pt-3 lg:pt-5 rounded-[16px] mb-[28px] xl:mb-[67px] lg:mt-[16.67px] ">
-                <img src="/iconLanding/Comma.svg" alt="img" />
+                <img className="xl:w-10 xl:h-7" src="/iconLanding/Comma.svg" alt="img" />
                 <p className="text-[#404040] leading-5 text-[10px] w-11/12 mobileNum:w-11/12 mobile:text-[12px] xl:mt-[31px] font-xregular mt-3 md:text-[14px]">
                   {item.text}
                 </p>
