@@ -1,3 +1,4 @@
+import Comment from '@/components/comment-section/Comment'
 import Container from '@/components/container/Container'
 import Reservation from '@/components/reservation-detail/Reservation'
 import ReservFeature from '@/components/reservation-features/ReservFeature'
@@ -13,6 +14,7 @@ export default function ServiceDetails() {
         <ReservIntroduction/>
         <ReservFeature />
         <ReversColumn />
+        <Comment/>
       </Container>
     </div>
   )
