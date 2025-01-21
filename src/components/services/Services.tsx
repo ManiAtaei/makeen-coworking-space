@@ -8,6 +8,7 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 
 import "./Services.css";
+import Link from "next/link";
 
 export default function Services() {
   const services = [
@@ -71,7 +72,7 @@ export default function Services() {
                     {item.text}
                   </p>
                   <div className="flex items-center justify-between mt-3">
-                    <a className="text-[#253359] text-[15px] mobile:px-[15px] mobile:text-[16px] font-xbold underline decoration-1 underline-offset-4 pr-3 xl:px-[27px] mobileNum:pr-[27px] md:px-[12px]" href="#"> مشاهده جزییات </a>
+                    <Link href="chair-service-detail"><button className="text-[#253359] text-[15px] mobile:px-[15px] mobile:text-[16px] font-xbold underline decoration-1 underline-offset-4 pr-3 xl:px-[27px] mobileNum:pr-[27px] md:px-[12px]"> مشاهده جزییات </button></Link>
                     <button className="bg-[#253359] text-white text-[14px] font-xbold py-[8.5px] w-2/5 lg:text-[16px] titleNav:w-[200px] ml-2 mobile:ml-4 md:mx-2 xl:mx-4 rounded-md"> رزرو فضا </button>
                   </div>
 
