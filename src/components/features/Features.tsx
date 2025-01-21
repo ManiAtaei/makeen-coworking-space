@@ -57,14 +57,14 @@ export default function Features() {
       <div className="flex flex-col items-center gap-4 ">
         <h1 className="text-2xl font-xbold mt-10"> امکانات مکین </h1>
         <div dir="ltr" className="grid-cols-2 grid-rows-2 md:grid-cols-3  grid lg:grid-cols-4  gap-4 mobileNum:gap-10 lg:gap-4">
-          {features.map((feature) => (
+          {features.map((item) => (
             <div
-              key={feature.id}
-              className={`bg-[#F4F5FC] flex flex-col items-center justify-center gap-2 py-[30px] ${feature.res}`}
+              key={item.id}
+              className={`bg-[#F4F5FC] flex flex-col items-center justify-center gap-2 py-[30px] ${item.res}`}
             >
-              <img className="px-[56px] " src={feature.image} alt="img" />
+              <img className="px-[56px] " src={item.image} alt="img" />
               <span className="text-[#253359] mt-4 font-xregular text-xl">
-                {feature.title}
+                {item.title}
               </span>
             </div>
           ))}

@@ -38,19 +38,20 @@ export default function Reservation() {
   ];
 
   return (
-    <div className=" md:pt-6 ">
-      <div className="flex flex-col bg-white rounded-t-3xl md:px-8 md:pt-[26px] lg:px-16 py-4 px-5 bg-whit">
+    <div className="bg-[#F4F5FC] md:pt-6 ">
+      <div className="flex flex-col md:bg-white rounded-t-3xl md:px-8 md:pt-[26px] lg:px-16 py-4 px-5">
         <h1 className="text-[18px] w-full xl:text-[24px] text-center md:text-right font-xbold text-[#253359]">
           جزییات سرویس صندلی اشتراکی
         </h1>
-        <div className="md:flex w-full md:gap-4 mt-[25px] xl:gap-6 "> 
+        <div className="md:flex w-full md:gap-4 md:mt-[25px] xl:gap-6 "> 
           <img className="py-4 w-full md:hidden " src="/imageLanding/Pic.svg" alt="img" />
           <img className="py-4 md:py-0 w-[55%] lg:w-[57%] xl:w-[69%] hidden md:block" src="/imageLanding/PicBig.svg" alt="img" />
-          <div className="bg-white md:shadow-[0_16px_8px_#63666714,0_0px_12px_#63666714] md:shadow-lg md:w-[45%] lg:w-[43%] xl:w-[34%] rounded-[16px] py-5 px-6 w-full">
+          <div className="bg-white shadow-[0_16px_8px_#63666714,0_0px_12px_#63666714] shadow-lg md:w-[45%] lg:w-[43%] xl:w-[34%] rounded-[16px] py-5 px-6 w-full">
             <h1 className="text-[#253359] text-[16px] xl:text-[20px] font-xbold">
               جزییات رزرو
             </h1>
             <form noValidate onSubmit={handleSubmit(onSubmit, onErrorHandler)}>
+              
               <div className="mt-[10px] xl:mt-6">
                 <select
                   id="option"
