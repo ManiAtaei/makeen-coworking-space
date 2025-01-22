@@ -61,9 +61,13 @@ export default function Comment() {
                   </span>
                 </div>
               </div>
-              <p className="text-[13.4px] md:text-[14.5px] xl:text-[16px] xl:font-xmedium font-xregular leading-[25.2px] mt-[9px] text-[#404040]">
+              <p className="text-[13.4px] md:text-[14.5px] xl:text-[16px] xl:font-xmedium font-xregular leading-[25.2px] mt-[9px] xl:leading-[35.2px] text-[#404040]">
                 {item.text}
               </p>
+              <div className="flex item-center justify-end pt-[9px] gap-4">
+                <img src="/iconLanding/Like.svg" alt="img" />
+                <img src="/iconLanding/Dislike.svg" alt="img" />
+              </div>
               {commentAdmin.map((item2) => (
                 <div key={item2.id} className="flex items-center py-4">
                   <img src={item2.image} alt="img" />

@@ -2,7 +2,7 @@ import React from "react";
 
 export default function ReversColumn() {
   return (
-    <div className="bg-white pt-5">
+    <div className="bg-white pt-5 lg:px-16">
       <div className="bg-gradient-to-b from-[#B6E7F8] to-[#E8F8FD] flex flex-col items-center py-4 gap-4">
         <h1 className="text-[#404040] text-[16px] font-xbold pt-4 lg:text-[18px]">
           نظرات کاربران

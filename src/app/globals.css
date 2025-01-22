@@ -51,3 +51,8 @@
   font-family: "x-ultraLight";
   src: url("/fonts/IRANSansXFaNum/IRANSansXFaNum-UltraLight.ttf") format("truetype");
 }
+
+html {
+  scrollbar-width: thin; 
+}
+
