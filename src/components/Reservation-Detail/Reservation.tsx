@@ -25,7 +25,6 @@ export default function Reservation() {
 
   const {
     handleSubmit,
-    formState: { errors },
     register,
   } = form;
 
