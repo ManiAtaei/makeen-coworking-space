@@ -33,7 +33,8 @@ export default function Navbar() {
       <div className="max-w-[1440px] h-[80px] mx-auto py-2 px-4 lg:py-4 lg:px-20 2xl:px-0  flex items-center justify-between ">
         
         <div className="flex items-center gap-16">
-          <img src="/imageLanding/logo-makeen.svg" alt="img" />
+          <img className="hidden" src="/imageLanding/logo-makeen.svg" alt="img" />
+          <img className="block" src="/imageLanding/logo-makeenSmall.svg" alt="img" />
           <ul className="hidden titleNav:flex text-[#404040] text-[16px] titleNav:block font-xmedium gap-8">
             <Link href="/"><li> صفحه اصلی </li></Link>
             <Link href="contactUs"><li> تماس باما </li></Link>

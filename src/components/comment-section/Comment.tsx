@@ -85,7 +85,7 @@ export default function Comment() {
           ))}
         <div className="flex items-center justify-center py-4">
           <img src="/iconLanding/arrow-down.svg" alt="img" />
-          <span className="text-[14px] font-xbold text-[#FF7B42] "> مشاهده همه نظرات </span>
+          <button className="text-[14px] font-xbold text-[#FF7B42] "> مشاهده همه نظرات </button>
         </div>
         </div>
       </div>

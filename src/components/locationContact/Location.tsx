@@ -17,13 +17,13 @@ export default function Location() {
     register,
   } = form;
 
-  const onSubmit = (data: dataType) => {
-    console.log(data);
-  };
+    const onSubmit = (data: dataType) => {
+      console.log(data);
+    };
 
-  const onErrorHandler = (errors: FieldErrors<dataType>) => [
-    console.log(errors, "errors"),
-  ];
+    const onErrorHandler = (errors: FieldErrors<dataType>) => [
+      console.log(errors, "errors"),
+    ];
 
   return (
     <div className="mt-[-40px] bg-[#253359] px-5 md:px-8 pt-5 md:pt-8 md:mb-12">
