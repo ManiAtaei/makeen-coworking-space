@@ -17,13 +17,13 @@ export default function Location() {
     register,
   } = form;
 
-    const onSubmit = (data: dataType) => {
-      console.log(data);
-    };
+  const onSubmit = (data: dataType) => {
+    console.log(data);
+  };
 
-    const onErrorHandler = (errors: FieldErrors<dataType>) => [
-      console.log(errors, "errors"),
-    ];
+  const onErrorHandler = (errors: FieldErrors<dataType>) => [
+    console.log(errors, "errors"),
+  ];
 
   return (
     <div className="mt-[-40px] bg-[#253359] px-5 md:px-8 pt-5 md:pt-8 md:mb-12">
@@ -40,12 +40,12 @@ export default function Location() {
         />
 
         <div className="md:w-[29%]">
-        <div className="flex items-center pb-4">
-          <img src="/iconLanding/arrow-left.svg" alt="img" />
-          <h1 className="text-white text-[16px] font-xbold ">
-            با ما در تماس باشید
-          </h1>
-        </div>
+          <div className="flex items-center pb-4">
+            <img src="/iconLanding/arrow-left.svg" alt="img" />
+            <h1 className="text-white text-[16px] font-xbold ">
+              با ما در تماس باشید
+            </h1>
+          </div>
           <form noValidate onSubmit={handleSubmit(onSubmit, onErrorHandler)}>
             <div className="flex flex-col">
               <label
