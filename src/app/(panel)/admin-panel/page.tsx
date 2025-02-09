@@ -129,6 +129,7 @@ export default function page() {
               </span>
             </div>
           </div>
+
           <div className="mx-6 pt-[28px] lg:pt-0 lg:mt-4">
             {itemLayout.map((item) => (
               <div
