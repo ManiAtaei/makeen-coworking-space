@@ -103,7 +103,7 @@ export default function Reservation() {
   };
 
   return (
-    <div className="px-5 max-w-[500px] mx-auto md:max-w-[900px] lg:max-w-[1440px] lg:mr-[260px] lg:px-6 lg:bg-white h-screen">
+    <div className="px-5 max-w-[500px] mx-auto md:max-w-[900px] lg:max-w-[1440px] lg:mr-[260px] lg:px-6 lg:bg-white h-screen rounded-lg">
       <div className="lg:flex lg:items-center lg:mt-6 w-full lg:gap-6">
         <h1 className="text-[#404040] text-center text-[16px] font-xbold mt-4 lg:text-right lg:flex lg:items-center">
           <FaCaretLeft className="w-6 h-6 hidden lg:block" />
