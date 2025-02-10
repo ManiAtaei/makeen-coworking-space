@@ -10,7 +10,6 @@ import { AiOutlineSafety } from "react-icons/ai";
 import { TbArmchair } from "react-icons/tb";
 import { LuTreePine } from "react-icons/lu";
 import { FaCaretLeft } from "react-icons/fa";
-import { GoPlus } from "react-icons/go";
 import { LuTrash2 } from "react-icons/lu";
 import { GoPlusCircle } from "react-icons/go";
 
