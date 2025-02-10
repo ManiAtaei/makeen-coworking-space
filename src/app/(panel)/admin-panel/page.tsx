@@ -22,7 +22,7 @@ import Features from "@/components/admin-panel/Features";
 import Payments from "@/components/admin-panel/Payments";
 import Comments from "@/components/admin-panel/Comments";
 import Tickets from "@/components/admin-panel/Tickets";
-import Reporting from "@/components/admin-panel/Reporting";
+import Reporting from "@/components/admin-panel/reporting/Reporting";
 import Banner from "@/components/admin-panel/Banner";
 
 export default function page() {
