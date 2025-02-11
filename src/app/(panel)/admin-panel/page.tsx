@@ -20,7 +20,7 @@ import Users from "@/components/admin-panel/users/Users";
 import Spaces from "@/components/admin-panel/spaces/Spaces";
 import Features from "@/components/admin-panel/Features";
 import Payments from "@/components/admin-panel/payment/Payments";
-import Comments from "@/components/admin-panel/Comments";
+import Comments from "@/components/admin-panel/review/Comments";
 import Tickets from "@/components/admin-panel/Tickets";
 import Reporting from "@/components/admin-panel/reporting/Reporting";
 import Banner from "@/components/admin-panel/Banner";

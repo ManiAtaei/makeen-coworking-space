@@ -59,7 +59,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="px-5 max-w-[500px] mx-auto md:max-w-[900px] lg:max-w-[1440px] lg:mr-[260px] lg:px-0">
+    <div className="px-5 max-w-[500px] mx-auto md:max-w-[900px] lg:max-w-[1440px] lg:mr-[260px] lg:px-0 h-screen">
       <h1 className="text-[#404040] text-center text-[16px] font-xbold mt-4 lg:my-6 lg:text-right lg:flex lg:items-center">
         <FaCaretLeft className="w-6 h-6 hidden lg:block" />
         داشبورد
