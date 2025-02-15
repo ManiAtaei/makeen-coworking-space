@@ -5,7 +5,7 @@ import { RiMore2Fill } from "react-icons/ri";
 import { FaCaretLeft } from "react-icons/fa";
 import ChartBar from "./chartBar";
 import { FaSquare } from "react-icons/fa";
-import LineChart from "./LineChart";
+import LineChart from "./lineChart";
 
 export default function Dashboard() {
   interface dataType {

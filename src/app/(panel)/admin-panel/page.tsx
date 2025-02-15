@@ -98,7 +98,7 @@ export default function page() {
 
   return (
     <>
-      <div className="px-5 lg:px-0 pt-6 lg:pt-0 lg:flex lg:items-start h-full lg:bg-[#F4F5FC]">
+      <div className="px-5 lg:px-0 pt-6 lg:pt-0 lg:flex lg:items-start lg:bg-[#F4F5FC]">
         <div className="flex items-center justify-between lg:hidden">
           <RxHamburgerMenu
             onClick={hamberger}
