@@ -21,9 +21,9 @@ import Spaces from "@/components/admin-panel/spaces/Spaces";
 import Features from "@/components/admin-panel/Features";
 import Payments from "@/components/admin-panel/payment/Payments";
 import Comments from "@/components/admin-panel/review/Comments";
-import Tickets from "@/components/admin-panel/Tickets";
 import Reporting from "@/components/admin-panel/reporting/Reporting";
 import Banner from "@/components/admin-panel/Banner";
+import Tickets from "@/components/admin-panel/ticket/Tickets";
 
 export default function page() {
   const [isOpen, setIsOpen] = useState(false);

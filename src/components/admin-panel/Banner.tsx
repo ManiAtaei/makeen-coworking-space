@@ -36,7 +36,7 @@ export default function Banner() {
           <div className="flex flex-col text-[#404040] font-xbold text-[14px]">
             <label htmlFor="titr1"> تیتر اول(بزرگ) </label>
             <input
-              className="placeholder-[#868686] py-[10px] px-3 mt-1 rounded-lg border border-[#CBCBCB] hover:border-blue-500"
+              className="placeholder-[#868686] py-[10px] px-1 mt-1 rounded-lg border border-[#CBCBCB] hover:border-blue-500"
               type="text"
               id="titr1"
               {...register("titr1")}
@@ -46,7 +46,7 @@ export default function Banner() {
           <div className="flex flex-col text-[#404040] font-xbold text-[14px] mt-6">
             <label htmlFor="titr1"> تیتر دوم(کوچک) </label>
             <input
-              className="placeholder-[#868686] py-[10px] px-1 rounded-lg border border-[#CBCBCB]"
+              className="placeholder-[#868686] py-[10px] px-1 mt-1 rounded-lg border border-[#CBCBCB]"
               type="text"
               id="titr1"
               {...register("titr1")}
