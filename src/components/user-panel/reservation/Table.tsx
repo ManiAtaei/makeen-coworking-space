@@ -39,6 +39,16 @@ export default function Table() {
       underReview: false,
       day: " 7 ",
     },
+    {
+      id: 3,
+      row: "1",
+      shared: " صندلی اشتراکی ",
+      method: "کارت به کارت",
+      date: "۱۳۰۴/۱۰/۱۳",
+      enabled: false,
+      underReview: false,
+      day: " 7 ",
+    },
   ];
 
   return (

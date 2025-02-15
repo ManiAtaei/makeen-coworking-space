@@ -71,19 +71,19 @@ export default function page() {
             onClick={hamberger}
             className="w-6 h-6 text-[#202020]"
           />
-          <img src="/admin-panel/logo-makeen.svg" alt="img" />
+          <img src="/user-panel/logo-makeen.svg" alt="img" />
           <RiLogoutCircleLine className="w-5 h-5 text-[#404040]" />
         </div>
         <div className="bg-white w-[248px] hidden lg:block lg:fixed lg:bottom-0 lg:top-0 lg:overflow-y-auto ">
           <img
             className="pt-6 pr-6"
-            src="/admin-panel/logo-makeen big.svg"
+            src="/user-panel/logo-makeen big.svg"
             alt="img"
           />
           <div className="bg-[#ECF9FD] flex items-center mx-6 py-2 rounded-lg mt-10 ">
             <img
               className="mr-4"
-              src="/admin-panel/Profile-Pic.svg"
+              src="/user-panel/Profile-Pic.svg"
               alt="img"
             />
             <FaPencil className="relative text-white bg-[#FF9568] p-[5px] w-6 h-6 rounded-full top-4 right-[-22px]" />
