@@ -88,7 +88,7 @@ export default function Notifications() {
 
       <div className="mt-4 border border-[#DFDFDF] rounded-lg md:mx-10">
         {notif.map((item) => (
-          <div className="border-b border-[#CBCBCB] odd:bg-[#F9F9F9] even:bg-white py-4 pr-4 gap-4 pl-6 flex items-center">
+          <div key={item.id} className="border-b border-[#CBCBCB] odd:bg-[#F9F9F9] even:bg-white py-4 pr-4 gap-4 pl-6 flex items-center">
             <div className="w-[10px] h-[10px] bg-[#E9594C] rounded-full"></div>
             <div className="w-full">
               <div className="md:flex md:items-center justify-between">
