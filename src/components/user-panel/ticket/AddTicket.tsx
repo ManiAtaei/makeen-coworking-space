@@ -94,7 +94,7 @@ export default function AddTicket() {
               />
               <p className="error">{errors.description?.message}</p>
             </div>
-            <div className="titleNav:flex titleNav:items-center lg:mt-8">
+            <div className="titleNav:flex titleNav:items-center lg:mt-8 titleNav:gap-6">
               <div
                 {...getRootProps()}
                 className="border-dashed border-2 border-[#44C0ED] bg-[#ECF9FD] rounded-lg cursor-pointer flex justify-center mt-4 lg:mt-0 py-[11.5px] w-full"
