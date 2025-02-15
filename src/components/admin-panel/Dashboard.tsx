@@ -65,7 +65,7 @@ export default function Dashboard() {
         داشبورد
       </h1>
       <div className=" lg:bg-white lg:w-full lg:px-8 lg:py-6 lg:rounded-[16px]">
-        <div className="flex items-center justify-between mt-6 w-full">
+        <div className="flex items-center justify-between mt-6 lg:mt-0 w-full">
           <span className="text-[#253359] text-[14px] font-xbold ">
             آمار رزرو روزانه
           </span>
@@ -195,7 +195,7 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-        <div className="border-[#4073D0] border rounded-[16px] mt-4 pt-4 pb-2 px-[18.18px] lg:border-0 lg:bg-white w-11/12">
+        <div className="border-[#4073D0] border rounded-[16px] mt-4 pt-4 pb-2 px-[18.18px] lg:border-0 lg:bg-white w-full">
           <div className="flex items-center justify-between  w-full">
             <span className="text-[#253359] text-[12px] lg:text-[14px] font-xbold ">
               نمودار رزروها
