@@ -42,7 +42,7 @@ export default function AddTicket() {
   };
 
   return (
-    <div className="px-5 max-w-[500px] mx-auto md:max-w-[900px] lg:max-w-[1440px] lg:pr-8 lg:pl-0 lg:bg-white h-screen rounded-lg">
+    <div className=" max-w-[500px] mx-auto md:max-w-[900px] lg:max-w-[1440px]  lg:pl-0 lg:bg-white h-screen rounded-lg">
       <div className="lg:flex w-full lg:mt-6 h-full">
         <div className="w-full">
           <div className="lg:flex lg:items-center w-full lg:gap-6">
@@ -111,7 +111,7 @@ export default function AddTicket() {
 
               <button
                 type="submit"
-                className="w-full bg-[#253359] text-[16px] font-xmedium text-white py-[11.5px] rounded-lg mt-4 lg:mt-0"
+                className="w-full bg-[#253359] text-[16px] font-xmedium text-white py-[11.5px] rounded-lg mt-4 titleNav:mt-0"
               >
                 ارسال تیکت
               </button>
