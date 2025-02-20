@@ -46,7 +46,7 @@ export default function Reservation() {
         <div className="md:flex w-full md:gap-4 md:mt-[25px] xl:gap-6 "> 
           <img className="py-4 w-full md:hidden " src="/imageLanding/Pic.svg" alt="img" />
           <img className="py-4 md:py-0 w-[55%] lg:w-[57%] xl:w-[69%] hidden md:block" src="/imageLanding/PicBig.svg" alt="img" />
-          <div className="bg-white shadow-[0_16px_8px_#63666714,0_0px_12px_#63666714] shadow-lg md:w-[45%] lg:w-[43%] xl:w-[34%] rounded-[16px] py-5 px-6 w-full">
+          <div className="bg-white shadow-lg md:w-[45%] lg:w-[43%] xl:w-[34%] rounded-[16px] py-5 px-6 w-full">
             <h1 className="text-[#253359] text-[16px] xl:text-[20px] font-xbold">
               جزییات رزرو
             </h1>

@@ -1,0 +1,26 @@
+.swipperAdmin {
+    width: 100%;
+    position: relative;
+    overflow: visible; 
+  }
+  
+  
+  .swipperAdmin .swiper-button-next::after,
+  .swipperAdmin .swiper-button-prev::after {
+    content: "" !important;
+  }
+  
+  .swipperAdmin .swiper-button-next {
+    position: absolute;
+    left: 0%;
+    background: url("/admin-panel/chevron-left.svg") no-repeat center;
+    background-size: contain;
+  }
+  
+  .swipperAdmin .swiper-button-prev {
+    position: absolute;
+    right: 0%;
+    background: url("/admin-panel/chevron-right.svg") no-repeat center;
+    background-size: contain;
+  }
+  
