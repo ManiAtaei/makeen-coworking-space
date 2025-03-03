@@ -4,8 +4,9 @@ import { HiOutlineExclamationCircle } from "react-icons/hi2";
 import { IoCloseCircleOutline } from "react-icons/io5";
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
 import { FaCaretLeft } from "react-icons/fa";
-import { Calendar } from "react-multi-date-picker";
 import ReservationModal from "./calender";
+import { IoIosArrowForward } from "react-icons/io";
+import { IoIosArrowBack } from "react-icons/io";
 
 export default function Table() {
   const info = [
@@ -129,11 +130,22 @@ export default function Table() {
         </table>
       </div>
       <div className="flex items-center mt-[35px] w-full">
-        <div className="join flex items-center justify-center w-full">
-          <button className="join-item btn btn-xs">1</button>
-          <button className="join-item btn btn-xs btn-active">2</button>
-          <button className="join-item btn btn-xs">3</button>
-          <button className="join-item btn btn-xs">4</button>
+      <div className="join flex items-center justify-center w-full mr-[-190px] text-[14px] font-xregular gap-[9px]">
+          <button className="bg-[#EDEDED] p-[6px] rounded-[6.67px]">
+            <IoIosArrowForward className="w-4 h-4 text-[#606060]  rounded-[4px]" />
+          </button>
+          <button className="bg-[#F1F8FF] px-[10.8px] py-[2.8px] rounded-[6.67px]">
+            1
+          </button>
+          <button className="bg-[#F1F8FF] px-[10.8px] py-[2.8px] rounded-[6.67px]">
+            2
+          </button>
+          <button className="bg-[#F1F8FF] px-[10.8px] py-[2.8px] rounded-[6.67px]">
+            3
+          </button>
+          <button className="bg-[#EDEDED] p-[6px] rounded-[6.67px]">
+            <IoIosArrowBack className="w-4 h-4 text-[#606060] " />
+          </button>
         </div>
       </div>
     </div>

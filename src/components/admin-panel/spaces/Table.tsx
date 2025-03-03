@@ -1,6 +1,8 @@
 import React from "react";
 import { LuTrash2 } from "react-icons/lu";
 import { SlEye } from "react-icons/sl";
+import { IoIosArrowForward } from "react-icons/io";
+import { IoIosArrowBack } from "react-icons/io";
 
 export default function Table() {
   const info = [
@@ -75,11 +77,22 @@ export default function Table() {
         <div className="w-3/12">
             <span className="text-[#868686] font-xregular text-[12px]"> نمایش <span className="text-[#202020] font-xbold">8</span> از 68 نتیجه </span>
         </div>
-        <div className="join flex items-center justify-center w-full mr-[-190px]">
-          <button className="join-item btn btn-xs">1</button>
-          <button className="join-item btn btn-xs btn-active">2</button>
-          <button className="join-item btn btn-xs">3</button>
-          <button className="join-item btn btn-xs">4</button>
+        <div className="join flex items-center justify-center w-full mr-[-190px] text-[14px] font-xregular gap-[9px]">
+          <button className="bg-[#EDEDED] p-[6px] rounded-[6.67px]">
+            <IoIosArrowForward className="w-4 h-4 text-[#606060]  rounded-[4px]" />
+          </button>
+          <button className="bg-[#F1F8FF] px-[10.8px] py-[2.8px] rounded-[6.67px]">
+            1
+          </button>
+          <button className="bg-[#F1F8FF] px-[10.8px] py-[2.8px] rounded-[6.67px]">
+            2
+          </button>
+          <button className="bg-[#F1F8FF] px-[10.8px] py-[2.8px] rounded-[6.67px]">
+            3
+          </button>
+          <button className="bg-[#EDEDED] p-[6px] rounded-[6.67px]">
+            <IoIosArrowBack className="w-4 h-4 text-[#606060] " />
+          </button>
         </div>
       </div>
     </div>

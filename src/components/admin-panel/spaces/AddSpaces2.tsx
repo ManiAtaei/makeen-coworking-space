@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { FieldErrors, useForm } from "react-hook-form";
 import { GrAttachment } from "react-icons/gr";
+import { IoAddCircleOutline } from "react-icons/io5";
+import { LuTrash2 } from "react-icons/lu";
 
 export default function AddSpaces2() {
   const [selectedOption, setSelectedOption] = useState("");
@@ -12,6 +14,8 @@ export default function AddSpaces2() {
   interface dataType {
     username: string;
     discription: string;
+    discount: string;
+    reserv: string;
   }
   const form = useForm<dataType>({});
 
@@ -51,6 +55,11 @@ export default function AddSpaces2() {
       drop2: " روزانه ",
     },
   ];
+  const disCount = [
+    { id: 1, day: " 5 رزرو ", Percentage: " 5% " },
+    { id: 2, day: " 5 رزرو ", Percentage: " 5% " },
+    { id: 3, day: " 5 رزرو ", Percentage: " 5% " },
+  ];
   const [file, setFile] = useState(null);
   const { getRootProps, getInputProps } = useDropzone({
     accept: "image/*,application/pdf",
@@ -60,6 +69,82 @@ export default function AddSpaces2() {
   });
   return (
     <div>
+      <div>
+        <h1 className="text-[#404040] text-[14px] font-xbold mt-8">تخفیف ها</h1>
+        <div>
+          <button
+            onClick={() => document.getElementById("my_modal_1").showModal()}
+            className="flex items-center bg-[#253359] text-white font-xmedium text-[14px] py-[9.5px] px-4 rounded-lg mt-2"
+          >
+            <IoAddCircleOutline /> افزودن تخفیف جدید
+          </button>
+        </div>
+        <div className="flex items-center w-full gap-6 mt-4">
+          {disCount.map((item) => (
+            <div className="flex items-center justify-between text-[12px] text-[#0C0C0C] font-xregular px-2 py-[4px] w-full max-w-[131px] rounded-lg border border-[#000000]">
+              <span>{item.day}</span>
+              <span>{item.Percentage}</span>
+              <LuTrash2 className="h-[22px] w-[22px] text-[#E9594C]" />
+            </div>
+          ))}
+        </div>
+      </div>
+      <dialog id="my_modal_1" className="modal">
+        <div className="modal-box py-8 w-full max-w-[400px]">
+          <form method="dialog">
+            <button className="btn btn-sm btn-circle btn-ghost absolute left-3 top-3">
+              ✕
+            </button>
+          </form>
+          <div className="">
+            <form
+              className="flex flex-col items-center"
+              noValidate
+              onSubmit={handleSubmit(onSubmit, onErrorHandler)}
+            >
+              <div className="w-full">
+                <label
+                  className="text-[14px] font-xbold text-[#202020] "
+                  htmlFor="reserv"
+                >
+                  تعداد رزرو
+                </label>
+                <input
+                  type="type"
+                  className="border border-[#CBCBCB] rounded-lg py-[12] px-3 mt-2 placeholder:text-[#ADADAD] text-[14.675px] font-xregular w-full text-right required:text-[#E9594C] required:text-[12px] required:font-xregular"
+                  placeholder=" تعداد رزرو را وارد نمایید "
+                  {...register("reserv", {
+                    required: " لطفا شماره موبایل خود را وارد نمایید ",
+                  })}
+                />
+              </div>
+              <div className="w-full mt-4">
+                <label
+                  className="text-[14px] font-xbold text-[#202020] "
+                  htmlFor="discount"
+                >
+                  درصد تخفیف
+                </label>
+                <input
+                  type="text"
+                  className="border border-[#CBCBCB] rounded-lg py-[12] px-3 mt-2 placeholder:text-[#ADADAD] text-[14.675px] font-xregular w-full required:text-[#E9594C] required:text-[12px] required:font-xregular"
+                  placeholder=" درصد تخفیف را وارد نمایید "
+                  {...register("discount", {
+                    required: " عبارت امنیتی به درستی وارد نشده ",
+                  })}
+                />
+              </div>
+              <button
+                type="submit"
+                className="bg-[#253359] text-white text-[16px] font-xmedium py-3 px-[119.5px] w-full rounded-[8px] mt-4"
+              >
+                افزودن تخفیف
+              </button>
+            </form>
+          </div>
+        </div>
+      </dialog>
+
       <form
         className="w-full"
         noValidate
@@ -173,7 +258,10 @@ export default function AddSpaces2() {
             </p>
           )}
         </div>
-        <button className="bg-[#253359] text-white w-full py-[12px] rounded-lg font-xmedium text-[16px]"> تایید و افزودن فضا </button>
+        <button className="bg-[#253359] text-white w-full py-[12px] rounded-lg font-xmedium text-[16px]">
+          {" "}
+          تایید و افزودن فضا{" "}
+        </button>
       </div>
     </div>
   );

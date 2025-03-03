@@ -1,13 +1,15 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaCaretLeft } from "react-icons/fa";
 import { IoCloseOutline } from "react-icons/io5";
 import { BiMessageMinus } from "react-icons/bi";
 import { LuUserRoundX } from "react-icons/lu";
 import { SlEye } from "react-icons/sl";
+import { PiFileXls } from "react-icons/pi";
+import { PiMoneyWavyLight } from "react-icons/pi";
 
 import Table from "./Table";
+import { useDropzone } from "react-dropzone";
 
 export default function Users() {
   const info = [
@@ -86,14 +88,61 @@ export default function Users() {
     console.log(data);
   };
 
+  const [file, setFile] = useState<File | null>(null);
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: {
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/png": [".png"],
+    },
+    maxSize: 5 * 1024 * 1024,
+    onDrop: (acceptedFiles) => {
+      setFile(acceptedFiles[0]);
+    },
+    onDropRejected: (fileRejections) => {
+      const error = fileRejections[0]?.errors[0]?.message;
+    },
+  });
+
   return (
     <div className="px-5 max-w-[500px] mx-auto md:max-w-[900px] lg:max-w-[1440px] lg:mr-[260px] lg:px-6 lg:bg-white h-screen rounded-lg">
-      <h1 className="text-[#404040] text-center text-[16px] font-xbold mt-4 lg:pt-4 lg:text-right lg:flex lg:items-center">
-        <FaCaretLeft className="w-6 h-6 hidden lg:block" />
-        کاربرها
-      </h1>
+      <div className="flex items-center justify-between mt-4 lg:pt-4 ">
+        <div className="w-full">
+          <h1 className="text-[#404040] text-center text-[16px] font-xbold  lg:text-right lg:flex lg:items-center">
+            <FaCaretLeft className="w-6 h-6 hidden lg:block" />
+            کاربرها
+          </h1>
+        </div>
+        <div className="flex items-center justify-end gap-2 w-full">
+          <div
+            {...getRootProps()}
+            className=" border-2 border-[#227346] bg-[#F4FFF9] rounded-lg cursor-pointer flex justify-center px-[11px] py-[6px] w-full max-w-[189px]"
+          >
+            <input {...getInputProps()} />
+            {file ? (
+              <p className="text-green-500">{file.name}</p>
+            ) : (
+              <p className="text-[#227346] flex items-center text-[14px] font-xregular gap-[6px]">
+                <PiFileXls className="w-6 h-6" /> آپلود فایل کاربران مکین
+              </p>
+            )}
+          </div>
+          <div
+            {...getRootProps()}
+            className=" border-2 border-[#4073D0] bg-[#ECF9FD] rounded-lg cursor-pointer flex justify-center px-[11px] py-[6px] w-full max-w-[189px]"
+          >
+            <input {...getInputProps()} />
+            {file ? (
+              <p className="text-green-500">{file.name}</p>
+            ) : (
+              <p className="text-[#4073D0] flex items-center text-[14px] font-xregular gap-[6px]">
+                <PiFileXls className="w-6 h-6" /> آپلود فایل کوورک اجبار
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
 
-      <div className="md:flex md:items-center md:justify-between mt-4 lg:mt-6">
+      <div className="md:flex md:items-center md:justify-between mt-4 lg:mt-6 w-full">
         <div className="flex items-center w-full justify-between ">
           <input
             type="checkbox"
@@ -117,11 +166,19 @@ export default function Users() {
             </form>
 
             <button
-              className="border border-[#253359] bg-[#B4E6F8] px-[10px] py-[10.44px] md:py-2 md:px-[34.97px] rounded-[8.36px] md:flex md:items-center md:text-[14px] md:font-xregular md:gap-2"
-              onClick={() => document.getElementById("my_modal_2").showModal()}
+              className=" border border-[#253359] bg-[#F9F9F9] px-[10px] py-[10.44px] md:py-[7px] md:px-[34.97px] rounded-[8.36px] md:flex md:items-center md:text-[14px] md:font-xregular md:gap-2"
+              onClick={() => document.getElementById("my_modal_5").showModal()}
             >
-              <BiMessageMinus className="text-[#253359] w-6 h-6" />
-              <span className="hidden md:block"> ارسال پیام </span>
+              <BiMessageMinus className="text-[#404040] w-6 h-6" />
+              <span className="hidden md:block text-[#404040]">
+                ارسال پیام
+              </span>
+            </button>
+            <button
+              onClick={() => document.getElementById("my_modal_6").showModal()}
+              className="border border-[#253359] flex items-center gap-2 bg-[#F9F9F9] text-[#404040] px-[25.47px] py-[7px] text-[12px] font-xregular rounded-[8.36px]"
+            >
+              <PiMoneyWavyLight className="w-6 h-6" /> شارژ کیف پول
             </button>
             <dialog id="my_modal_2" className="modal w-full">
               <div className="modal-box w-full rounded-none py-0 border border-[#E9594C] flex items-center justify-around px-0">
@@ -138,11 +195,15 @@ export default function Users() {
             </dialog>
           </div>
         </div>
-        <div>
-          <form noValidate onSubmit={handleSubmit(onSubmit)}>
+        <div className="">
+          <form
+            className="flex items-center w-full justify-end gap-2"
+            noValidate
+            onSubmit={handleSubmit(onSubmit)}
+          >
             <div className="flex flex-col pt-3 md:pt-0">
               <input
-                className="placeholder-[#868686] placeholder:text-[14px] font-xregular py-[12px] md:py-2 px-2 md:w-[160px] rounded-lg border-solid border-[1px] border-black"
+                className="placeholder-[#868686] placeholder:text-[14px] font-xregular py-[12px] md:py-[7px] px-2 md:w-[160px] rounded-lg border-solid border-[1px] border-black"
                 placeholder=" جستجو  "
                 type="search"
                 id="search"
@@ -218,5 +279,4 @@ export default function Users() {
       </div>
     </div>
   );
-
 }
