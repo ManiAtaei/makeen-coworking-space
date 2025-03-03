@@ -18,9 +18,9 @@ export default function RootLayout({
     <html lang="en">
       <body dir="rtl">
         
-        {/* <Navbar /> */}
+        <Navbar />
         {children}
-        {/* <Footer /> */}
+        <Footer />
 
       </body>
     </html>
