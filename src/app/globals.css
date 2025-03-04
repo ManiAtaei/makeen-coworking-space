@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 
+
 @font-face {
   font-family: "x-black";
   src: url("/fonts/IRANSansXFaNum/IRANSansXFaNum-Black.ttf") format("truetype");
