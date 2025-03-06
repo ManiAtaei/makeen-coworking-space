@@ -9,6 +9,12 @@ import Captcha from "../Auth/Captcha";
 import Otp from "../Auth/Otp";
 import ResetPasswod from "../Auth/ResetPassword";
 
+type AuthStep = 1 | 2 | 3 | 4 | 5;
+
+interface AuthComponentProps {
+  setStep: React.Dispatch<React.SetStateAction<AuthStep>>;
+}
+
 export default function Navbar() {
   const titleHamberger = [
     { id: 1, title: "صفحه اصلی" },
@@ -17,7 +23,7 @@ export default function Navbar() {
   ];
 
   const [isOpen, setIsOpen] = useState(false);
-  const [authStep, setAuthStep] = useState<1 | 2 |3|4|5>(1);
+  const [authStep, setAuthStep] = useState<AuthStep>(1);
 
   const hamberger = () => {
     setIsOpen(!isOpen);
@@ -25,6 +31,14 @@ export default function Navbar() {
 
   const closeHamber = () => {
     setIsOpen(false);
+  };
+
+  const handleModalOpen = () => {
+    setAuthStep(1);
+    const modal = document.getElementById("my_modal_3") as HTMLDialogElement;
+    if (modal) {
+      modal.showModal();
+    }
   };
 
   return (
@@ -47,10 +61,7 @@ export default function Navbar() {
           </div>
 
           <button
-            onClick={() => {
-              setAuthStep(1);
-              document.getElementById("my_modal_3")?.showModal();
-            }}
+            onClick={handleModalOpen}
             className="hidden text-[#44C0ED] text-[16px] font-xmedium lg:flex lg:items-center gap-1"
           >
             <img src="/iconLanding/profileBlue.svg" alt="" />
@@ -62,7 +73,11 @@ export default function Navbar() {
               <form method="dialog">
                 <button 
                   className="btn btn-sm btn-circle btn-ghost absolute left-3 top-3"
-                  onClick={() => setAuthStep(1)}
+                  onClick={() => {
+                    setAuthStep(1);
+                    const modal = document.getElementById("my_modal_3") as HTMLDialogElement;
+                    if (modal) modal.close();
+                  }}
                 >
                   <IoCloseOutline className="w-7 h-7" />
                 </button>
