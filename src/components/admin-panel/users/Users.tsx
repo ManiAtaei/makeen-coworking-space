@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import { FieldErrors, useForm } from "react-hook-form";
 import { FaCaretLeft } from "react-icons/fa";
 import { IoCloseOutline } from "react-icons/io5";
 import { BiMessageMinus } from "react-icons/bi";
 import { LuUserRoundX } from "react-icons/lu";
 import { SlEye } from "react-icons/sl";
 import { PiFileXls } from "react-icons/pi";
+import { IoClose } from "react-icons/io5";
 import { PiMoneyWavyLight } from "react-icons/pi";
 
 import Table from "./Table";
@@ -75,18 +76,26 @@ export default function Users() {
     },
   ];
 
-  interface emailType {
+  const search = useForm<dataType>({});
+  const { handleSubmit, register , formState: { errors },} = search;
+
+  const onSubmit = (data: dataType) => {
+    console.log(data);
+  };
+  
+  interface dataType {
+    discription: string;
     search: string;
     select: string;
   }
-
-  const search = useForm<emailType>({});
-
-  const { handleSubmit, register } = search;
-
-  const onSubmit = (data: emailType) => {
-    console.log(data);
-  };
+  const check = [
+    { id: 1, text: " پیامک " },
+    { id: 2, text: " اعلان " },
+    { id: 3, text: " ایمیل " },
+  ];
+  const onErrorHandler = (error: FieldErrors) => {
+    console.log(error);
+  };  
 
   const [file, setFile] = useState<File | null>(null);
   const { getRootProps, getInputProps } = useDropzone({
@@ -170,16 +179,134 @@ export default function Users() {
               onClick={() => document.getElementById("my_modal_5").showModal()}
             >
               <BiMessageMinus className="text-[#404040] w-6 h-6" />
-              <span className="hidden md:block text-[#404040]">
-                ارسال پیام
-              </span>
+              <span className="hidden md:block text-[#404040]">ارسال پیام</span>
             </button>
+            <dialog id="my_modal_5" className="modal w-full ">
+              <div className="modal-box w-full max-w-[450px] mx-auto">
+                <form method="dialog">
+                  <button className="btn btn-sm btn-circle btn-ghost absolute left-3 top-4">
+                    <IoClose className="w-6 h-6" />
+                  </button>
+                </form>
+                <div className="flex flex-col w-full text-[#202020] text-[14px] font-xbold gap-4">
+                  <div className="flex justify-center mt-1"></div>
+                  <form
+                    noValidate
+                    onSubmit={handleSubmit(onSubmit, onErrorHandler)}
+                  >
+                    <div className="flex flex-col gap-[6px] w-full">
+                      <label
+                        className="text-[14px] font-xbold text-[#404040] "
+                        htmlFor="discription"
+                      >
+                        متن پیام
+                      </label>
+                      <input
+                        className="placeholder-[#868686] font-xregular text-[14px] md:pb-[121px] md:pt-[10px] px-3 rounded-lg border border-[#CBCBCB]"
+                        placeholder=" متن پیام را اینجا بنویسید "
+                        type="text"
+                        id="username"
+                        {...register("discription", {
+                          required: "پر کردن فیلد قیمت اجباری است ",
+                        })}
+                      />
+                      <p className="error">{errors.discription?.message}</p>
+                    </div>
+
+                    <div className="form-control flex flex-row items-center gap-6">
+                      {check.map((item) => (
+                        <label
+                          key={item.id}
+                          className="cursor-pointer label flex items-center gap-2"
+                        >
+                          <input
+                            type="checkbox"
+                            defaultChecked
+                            className=" rounded-"
+                          />
+                          <span className="text-[#202020] font-xregular text-[14px]">
+                            {item.text}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+
+                    <button className="text-white bg-[#253359] text-[14px] font-xmedium py-[9.5px] w-full rounded-lg mt-3">
+                      ارسال
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </dialog>
             <button
               onClick={() => document.getElementById("my_modal_6").showModal()}
               className="border border-[#253359] flex items-center gap-2 bg-[#F9F9F9] text-[#404040] px-[25.47px] py-[7px] text-[12px] font-xregular rounded-[8.36px]"
             >
               <PiMoneyWavyLight className="w-6 h-6" /> شارژ کیف پول
             </button>
+            <dialog id="my_modal_6" className="modal w-full ">
+              <div className="modal-box w-full max-w-[450px] mx-auto">
+                <form method="dialog">
+                  <button className="btn btn-sm btn-circle btn-ghost absolute left-3 top-4">
+                    <IoClose className="w-6 h-6" />
+                  </button>
+                </form>
+                <div className="flex flex-col w-full text-[#202020] text-[14px] font-xbold gap-4">
+                  <div className="flex justify-center">
+                    <img src="/admin-panel/money-add.svg" alt="img" />
+                  </div>
+                  <form
+                    noValidate
+                    onSubmit={handleSubmit(onSubmit, onErrorHandler)}
+                  >
+                    <div className="flex flex-col gap-[8px] w-full">
+                      <label
+                        className="text-[14px] font-xbold text-[#404040] "
+                        htmlFor="discription"
+                      >
+                        مبلغ شارژ
+                      </label>
+                      <input
+                        className="placeholder-[#868686] font-xregular text-[14px] py-[12.5px] px-3 rounded-lg border border-[#CBCBCB]"
+                        placeholder=" مبلغ شارژ را وارد نمایید "
+                        type="text"
+                        id="username"
+                        {...register("discription", {
+                          required: "پر کردن فیلد قیمت اجباری است ",
+                        })}
+                      />
+                      <p className="error">{errors.discription?.message}</p>
+                    </div>
+                    <div className="flex items-center justify-start w-full gap-4 mt-3">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name="radio-7"
+                          className="radio radio-info w-5 h-5"
+                          defaultChecked
+                        />
+                        <span className="font-xregular text-[14px]">
+                          شارژ کیف
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name="radio-7"
+                          className="radio radio-info w-5 h-5"
+                        />
+                        <span className="font-xregular text-[14px]">
+                          هدیه مکین
+                        </span>
+                      </div>
+                    </div>
+                    <button className="text-white bg-[#253359] text-[14px] font-xmedium py-[13.5px] w-full rounded-lg mt-4">
+                      ارسال
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </dialog>
             <dialog id="my_modal_2" className="modal w-full">
               <div className="modal-box w-full rounded-none py-0 border border-[#E9594C] flex items-center justify-around px-0">
                 <IoCloseOutline className="text-white bg-[#E9594C] w-5 h-5 rounded-full" />

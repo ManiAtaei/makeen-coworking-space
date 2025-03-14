@@ -52,7 +52,7 @@ export default function Header() {
                 </li>
               </ul>
             </details>
-            <button className="hidden bg-[#253359] w-[56px] h-[56px] rounded-l-[8px] sm:hidden md:block md:flex md:justify-center md:items-center">
+            <button className="hidden bg-[#253359] w-[56px] h-[56px] rounded-l-[8px] sm:hidden md:flex md:justify-center md:items-center">
               <GoSearch className="text-white w-6 h-6" />
             </button>
           </div>

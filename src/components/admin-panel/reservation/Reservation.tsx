@@ -170,7 +170,7 @@ export default function Reservation() {
                   >
                     <BiMessageMinus className="text-[#404040] w-6 h-6" />
                     <span className="hidden md:block text-[#404040]">
-                      ارسال پیام{" "}
+                      ارسال پیام
                     </span>
                   </button>
                   <button

@@ -1,5 +1,7 @@
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import React, { useEffect } from "react";
 import { LuUserRoundX } from "react-icons/lu";
 import { SlEye } from "react-icons/sl";
 import { CiMoneyBill } from "react-icons/ci";
@@ -52,6 +54,24 @@ export default function Table() {
 
     fetchData();
   }, []);
+
+  const dataUser = async () => {
+    try {
+      const response = await fetch("https://109.230.200.230:7890/api/v1/Admins/Users", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json(); // تبدیل response به JSON
+      console.log(data); // نمایش دیتا در کنسول
+    } catch (error) {
+      console.log("Error fetching data:", error);
+    }
+  }
+  useEffect(() => {
+    dataUser();
+  }, [])
 
   return (
     <div>
