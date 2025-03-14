@@ -176,7 +176,7 @@ export default function Login({ setStep }) {
         console.log("ورود موفقیت‌آمیز با کپچا");
         const modal = document.getElementById("my_modal_3") as HTMLDialogElement;
         if (modal) modal.close();
-        router.push("/");
+        router.push("/admin-panel");
       } else {
         throw new Error("ورود ناموفق - پاسخ API موفقیت‌آمیز نبود");
       }

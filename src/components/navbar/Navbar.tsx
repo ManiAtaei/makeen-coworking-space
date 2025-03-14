@@ -17,9 +17,11 @@ interface AuthComponentProps {
 
 export default function Navbar() {
   const titleHamberger = [
-    { id: 1, title: "صفحه اصلی" },
-    { id: 2, title: " تماس باما " },
-    { id: 3, title: " سیاست ها و قوانین " },
+    { id: 1, title: " خانه " },
+    { id: 2, title: " تماس با ما " },
+    { id: 3, title: " سیاست و قوانین " },
+    { id: 4, title: " رزرو فضا " },
+    { id: 5, title: " حساب کاربری " },
   ];
 
   const [isOpen, setIsOpen] = useState(false);
@@ -42,22 +44,68 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="w-screen bg-white fixed z-50 top-0 left-0 right-0">
-      <div className="max-w-[1440px] h-[80px] mx-auto py-2 px-4 lg:py-4 lg:px-20 2xl:px-0  flex items-center justify-between">
+    <nav className="w-screen bg-white fixed z-20 top-0 left-0 right-0">
+      <div className="max-w-[1440px] mx-auto mt-6 px-5 lg:py-4 lg:px-20 2xl:px-0  flex items-center justify-between">
+        <div className="lg:hidden">
+          <button onClick={hamberger}>
+            {isOpen ? (
+              <svg
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-5 h-5 sm:w-5 sm:h-5"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                  clipRule="evenodd"
+                ></path>
+              </svg>
+            ) : (
+              <img
+                src="/iconLanding/Hamburger-Menu.svg"
+                alt="img"
+                className="w-6 h-6"
+              />
+            )}
+          </button>
+        </div>
         <div className="flex items-center gap-16">
-          <img className="hidden" src="/imageLanding/logo-makeen.svg" alt="img" />
-          <img className="block" src="/imageLanding/logo-makeenSmall.svg" alt="img" />
-          <ul className="hidden titleNav:flex text-[#404040] text-[16px] font-xmedium gap-8">
-            <Link href="/"><li> صفحه اصلی </li></Link>
-            <Link href="contactUs"><li> تماس باما </li></Link>
+          <img
+            className="hidden lg:block"
+            src="/imageLanding/logo-makeen.svg"
+            alt="img"
+          />
+          <img
+            className="block lg:hidden"
+            src="/imageLanding/logo-makeenSmall.svg"
+            alt="img"
+          />
+          <ul className="hidden lg:flex text-[#404040] text-[16px] font-xmedium gap-8">
+            <Link href="/">
+              <li> صفحه اصلی </li>
+            </Link>
+            <Link href="contactUs">
+              <li> تماس باما </li>
+            </Link>
             <li> سیاست ها و قوانین </li>
           </ul>
         </div>
 
         <div className="flex items-center gap-3 mobileNum:gap-11">
-          <div className="mobile:flex mobile:items-center gap-3 hidden text-[#404040]">
-            <FiPhoneCall className="w-6 h-6" />
-            <span className="text-[16px] font-xmedium"> ۰۲۱-۷۷۱۸۸۱۸۵-۶ </span>
+          <div className="flex items-center gap-2 text-[#404040]">
+            <button>
+              <img src="/iconLanding/Support.svg" alt="img" />
+            </button>
+            <button className="lg:hidden">
+              <img
+                src="/iconLanding/Mobile-Register-State-Button.svg"
+                alt="img"
+              />
+            </button>
+            <span className="text-[16px] font-xmedium hidden titleNav:block">
+              ۰۲۱-۷۷۱۸۸۱۸۵-۶
+            </span>
           </div>
 
           <button
@@ -71,11 +119,13 @@ export default function Navbar() {
           <dialog id="my_modal_3" className="modal">
             <div className="modal-box w-full min-w-fit px-0 pt-8">
               <form method="dialog">
-                <button 
+                <button
                   className="btn btn-sm btn-circle btn-ghost absolute left-3 top-3"
                   onClick={() => {
                     setAuthStep(1);
-                    const modal = document.getElementById("my_modal_3") as HTMLDialogElement;
+                    const modal = document.getElementById(
+                      "my_modal_3"
+                    ) as HTMLDialogElement;
                     if (modal) modal.close();
                   }}
                 >
@@ -91,24 +141,24 @@ export default function Navbar() {
               </div>
             </div>
           </dialog>
-
-          <div className="pl-5 lg:hidden">
-            <button onClick={hamberger} className="h-[38px] w-[38px] border-[1px] rounded-[8px] bg-white hover:bg-gray-100 border-solid border-[#D1D5D8] p-2">
-              {isOpen ? (
-                <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" className="w-5 h-5">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"></path>
-                </svg>
-              ) : (
-                <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 sm:w-5 sm:h-5">
-                  <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd"></path>
-                </svg>
-              )}
-            </button>
-          </div>
         </div>
-
-        <div className={`${isOpen ? "block" : "hidden"} xl:hidden fixed top-0 right-0 bottom-0 bg-white w-[320px] space-y-[18px]`}>
-          {/* محتوای منوی همبرگر */}
+        {isOpen && (
+          <div onClick={closeHamber} className="fixed inset-0 bg-black opacity-20">
+          </div>
+        )}
+        <div
+          className={`${
+            isOpen ? "block" : "hidden"
+          } xl:hidden z-50 fixed top-0 right-0 bottom-0 bg-white w-[248px] rounded-l-[16px]`}
+        >
+          <div className="flex items-start justify-between px-8">
+            <div className="flex flex-col mt-[52px] gap-6 ">
+              {titleHamberger.map((item) => (
+                <div className="text-[#868686] text-[14px] font-xregular" key={item.id}>{item.title}</div>
+              ))}
+            </div>
+            <img onClick={closeHamber} src="/iconLanding/Close.svg" alt="img" className="mt-8" />
+          </div>
         </div>
       </div>
     </nav>
