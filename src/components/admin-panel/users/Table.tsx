@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Cookies from "js-cookie";
 import { LuUserRoundX } from "react-icons/lu";
 import { SlEye } from "react-icons/sl";
 import { CiMoneyBill } from "react-icons/ci";
@@ -25,19 +24,12 @@ export default function Table() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const authToken = Cookies.get("token");
-        console.log("Auth Token from Cookies:", authToken); // دیباگ توکن
-
-        if (!authToken) {
-          throw new Error("توکن Authorization یافت نشد. لطفاً وارد شوید.");
-        }
+        
 
         const response = await axios.get(
           "https://109.230.200.230:7890/api/v1/Admins/Users?page=1&pageSize=8&orderBy=CreationTime&sortOrder=DESC",
           {
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-            },
+           
             withCredentials: true,
           }
         );
@@ -50,7 +42,7 @@ export default function Table() {
           message: error.message,
           response: error.response?.data || "No response",
           status: error.response?.status || "Unknown",
-          headers: error.config?.headers, // چک کردن هدرهای ارسالی
+          headers: error.config?.headers, 
         });
         setError(
           `خطا در بارگذاری داده‌ها: ${error.message} (وضعیت: ${error.response?.status || "نامشخص"})`
