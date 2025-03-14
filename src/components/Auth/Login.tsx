@@ -20,6 +20,7 @@ const api = axios.create({
   },
   timeout: 15000,
   httpsAgent: new (require("https").Agent)({ rejectUnauthorized: false }),
+  withCredentials: true,
 });
 
 export default function Login({ setStep }) {
@@ -51,7 +52,6 @@ export default function Login({ setStep }) {
 
   const extractCaptchaId = (errorResponse: any): string | null => {
     try {
-      console.log("استخراج CaptchaID از پاسخ:", errorResponse);
       const paths = [
         errorResponse?.error?.Content?.CaptchaID,
         errorResponse?.Content?.CaptchaID,
@@ -64,14 +64,11 @@ export default function Login({ setStep }) {
 
       for (const path of paths) {
         if (path) {
-          console.log("CaptchaID پیدا شد:", path);
           return path;
         }
       }
-      console.warn("CaptchaID پیدا نشد");
       return null;
     } catch (e) {
-      console.error("خطا در استخراج CaptchaID:", e);
       return null;
     }
   };
@@ -83,15 +80,11 @@ export default function Login({ setStep }) {
     setErrorMessage(null);
 
     try {
-      console.log("مرحله 1 - درخواست ورود با شماره:", data.call);
       const response = await api.get("/Auth/Login", {
         params: { PhoneNumber: data.call, Password: data.security },
       });
-      console.log("مرحله 1 - پاسخ API کامل:", JSON.stringify(response.data, null, 2));
 
-      // بررسی پیام موفقیت از API
       if (response.data?.message === "You are now logged in.") {
-        console.log("ورود موفقیت‌آمیز بدون کپچا");
         const modal = document.getElementById("my_modal_3") as HTMLDialogElement;
         if (modal) modal.close();
         router.push("/");
@@ -106,7 +99,6 @@ export default function Login({ setStep }) {
         throw new Error("CaptchaID در پاسخ پیدا نشد");
       }
     } catch (error) {
-      console.error("خطا در مرحله 1:", error);
       if (error.response?.status === 428) {
         const captchaData = extractCaptchaId(error.response.data);
         if (captchaData) {
@@ -127,7 +119,6 @@ export default function Login({ setStep }) {
 
   const fetchCaptchaImage = async () => {
     if (!captchaId || !phoneNumber) {
-      console.log("captchaId یا phoneNumber موجود نیست:", { captchaId, phoneNumber });
       return;
     }
 
@@ -139,9 +130,7 @@ export default function Login({ setStep }) {
       });
       const imageUrl = URL.createObjectURL(new Blob([response.data], { type: "image/png" }));
       setCaptchaImage(imageUrl);
-      console.log("تصویر کپچا با موفقیت دریافت شد");
     } catch (error) {
-      console.error("خطا در دریافت تصویر کپچا:", error);
       setCaptchaImage(null);
     }
   };
@@ -153,13 +142,6 @@ export default function Login({ setStep }) {
     setErrorMessage(null);
 
     try {
-      console.log("مرحله 2 - ارسال با کپچا:", {
-        PhoneNumber: data.call,
-        Password: data.security,
-        CaptchaId: captchaId,
-        CaptchaCode: data.captchaCode,
-      });
-
       const response = await api.get("/Auth/Login", {
         params: {
           PhoneNumber: data.call,
@@ -169,11 +151,7 @@ export default function Login({ setStep }) {
         },
       });
 
-      console.log("مرحله 2 - پاسخ API کامل:", JSON.stringify(response.data, null, 2));
-
-      // بررسی پیام موفقیت از API
       if (response.data?.message === "You are now logged in.") {
-        console.log("ورود موفقیت‌آمیز با کپچا");
         const modal = document.getElementById("my_modal_3") as HTMLDialogElement;
         if (modal) modal.close();
         router.push("/admin-panel");
@@ -181,7 +159,25 @@ export default function Login({ setStep }) {
         throw new Error("ورود ناموفق - پاسخ API موفقیت‌آمیز نبود");
       }
     } catch (error) {
-      console.error("خطا در ورود با کپچا:", error);
+      console.error("خطا در ورود با کپچا - جزئیات کامل:", {
+        message: error.message,
+        response: error.response
+          ? {
+              status: error.response.status,
+              statusText: error.response.statusText,
+              headers: error.response.headers,
+              data: JSON.stringify(error.response.data, null, 2),
+            }
+          : "بدون پاسخ سرور",
+        request: error.config
+          ? {
+              url: error.config.url,
+              method: error.config.method,
+              params: error.config.params,
+            }
+          : "مشخصات درخواست در دسترس نیست",
+      });
+
       if (error.response?.status === 428) {
         const newCaptchaId = extractCaptchaId(error.response.data);
         if (newCaptchaId) {
@@ -202,7 +198,6 @@ export default function Login({ setStep }) {
   };
 
   const onSubmit = (data: FormType) => {
-    console.log("فرم سابمیت شد - مرحله فعلی:", currentStep);
     if (currentStep === 1) {
       fetchCaptchaId(data);
     } else if (currentStep === 2) {
@@ -211,7 +206,6 @@ export default function Login({ setStep }) {
   };
 
   const onErrorHandler = (errors: FieldErrors<FormType>) => {
-    console.log("خطاهای فرم:", errors);
     if (currentStep === 1) {
       fetchCaptchaId(getValues() as FormType);
     }
@@ -219,7 +213,6 @@ export default function Login({ setStep }) {
 
   useEffect(() => {
     if (currentStep === 2 && captchaId && phoneNumber) {
-      console.log("مرحله 2 - دریافت تصویر کپچا");
       fetchCaptchaImage();
     }
   }, [currentStep, captchaId, phoneNumber]);
@@ -341,7 +334,6 @@ export default function Login({ setStep }) {
                       <p>در حال بارگذاری تصویر کپچا...</p>
                     </div>
                   )}
-                  
                 </div>
                 <input
                   type="text"
