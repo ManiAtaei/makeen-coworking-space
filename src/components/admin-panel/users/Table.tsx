@@ -25,19 +25,11 @@ export default function Table() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const authToken = Cookies.get("token");
-        console.log("Auth Token from Cookies:", authToken); // دیباگ توکن
-
-        if (!authToken) {
-          throw new Error("توکن Authorization یافت نشد. لطفاً وارد شوید.");
-        }
 
         const response = await axios.get(
           "https://109.230.200.230:7890/api/v1/Admins/Users?page=1&pageSize=8&orderBy=CreationTime&sortOrder=DESC",
           {
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-            },
+            
             withCredentials: true,
           }
         );
