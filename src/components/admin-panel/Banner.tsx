@@ -18,21 +18,41 @@ export default function Banner() {
     register,
   } = form;
 
-  const onSubmit = (data: dataType) => {
-    console.log(data);
+  const onSubmit = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("firstTitle", form.getValues("titr1"));
+      formData.append("secondTitle", form.getValues("titr2"));
+      if (file) {
+        formData.append("file", file);
+      }
+
+      const response = await fetch(
+        "https://109.230.200.230:7890/api/v1/Admins/Web-Site-Setting",
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.log("Error fetching data:", error);
+    }
   };
 
   const onErrorHandler = (errors: FieldErrors<dataType>) => [
     console.log(errors, "errors"),
   ];
 
-   const [file, setFile] = useState(null);
-    const { getRootProps, getInputProps } = useDropzone({
-      accept: "image/*,application/pdf",
-      onDrop: (acceptedFiles) => {
-        setFile(acceptedFiles[0]);
-      },
-    });
+  const [file, setFile] = useState(null);
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: "image/*,application/pdf",
+    onDrop: (acceptedFiles) => {
+      setFile(acceptedFiles[0]);
+    },
+  });
 
   return (
     <div className="px-5 max-w-[500px] mx-auto md:max-w-[900px] lg:max-w-[1440px] lg:mr-[260px] lg:px-8 lg:bg-white h-screen lg:rounded-lg">
@@ -62,25 +82,30 @@ export default function Banner() {
             />
             <p className="error">{errors.titr1?.message}</p>
           </div>
+          <div className="flex justify-between items-center w-full mt-6 gap-16 max-w-[905px]">
+            <div
+              {...getRootProps()}
+              className="border-dashed border-2 border-[#44C0ED] bg-[#ECF9FD] rounded-lg cursor-pointer flex justify-center mt-4 lg:mt-0 py-[11.5px] w-full"
+            >
+              <input {...getInputProps()} />
+              {file ? (
+                <p className="text-green-500">{file.name}</p>
+              ) : (
+                <p className="text-[#253359] flex items-center justify-between w-full text-[14px] font-xregular px-6">
+                  <SlEye className="h-[22px] w-[22px]" />
+                  نام فایل آپلود شده.پسوند{" "}
+                  <LuTrash2 className="h-[22px] w-[22px]" />
+                </p>
+              )}
+            </div>
+            <button
+              type="submit"
+              className="bg-[#253359] text-[16px] font-xmedium flex items-center justify-center text-white py-3 rounded-lg w-full"
+            >
+              <span className=""> ثبت ویرایش </span>
+            </button>
+          </div>
         </form>
-      </div>
-      <div className="flex justify-between items-center w-full mt-6 gap-16 max-w-[905px]">
-          <div
-                  {...getRootProps()}
-                  className="border-dashed border-2 border-[#44C0ED] bg-[#ECF9FD] rounded-lg cursor-pointer flex justify-center mt-4 lg:mt-0 py-[11.5px] w-full"
-                >
-                  <input {...getInputProps()} />
-                  {file ? (
-                    <p className="text-green-500">{file.name}</p>
-                  ) : (
-                    <p className="text-[#253359] flex items-center justify-between w-full text-[14px] font-xregular px-6">
-                  <SlEye className="h-[22px] w-[22px]" />نام فایل آپلود شده.پسوند <LuTrash2 className="h-[22px] w-[22px]" />
-                    </p>
-                  )}
-                </div>
-        <button className="bg-[#253359] text-[16px] font-xmedium flex items-center justify-center text-white py-3 rounded-lg w-full">
-          <span className=""> ثبت ویرایش </span>
-        </button>
       </div>
     </div>
   );

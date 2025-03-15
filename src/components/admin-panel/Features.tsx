@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { CiWifiOn } from "react-icons/ci";
 import { PiCoffeeLight } from "react-icons/pi";
 import { PiOfficeChair } from "react-icons/pi";
@@ -17,6 +17,8 @@ import { FieldErrors, useForm } from "react-hook-form";
 import { useDropzone } from "react-dropzone";
 import { IoIosArrowForward } from "react-icons/io";
 import { IoIosArrowBack } from "react-icons/io";
+import axios from "axios";
+import { useCookies } from "react-cookie";
 
 const Features = () => {
   const features = [
@@ -43,10 +45,15 @@ const Features = () => {
     { icon: <TbArmchair size={24} />, label: "صندلی اختصاصی ", enabled: true },
     { icon: <LuTreePine size={24} />, label: " فضای سبز ", enabled: true },
   ];
+
   interface dataType {
-    username: string;
-    discription: string;
+    feature: string;
   }
+
+  const [cookies] = useCookies(['Authorization']);
+  const [loginError, setLoginError] = useState('');
+  const fileRef = useRef<File | null>(null);
+
   const form = useForm<dataType>({});
   const {
     handleSubmit,
@@ -54,17 +61,71 @@ const Features = () => {
     register,
   } = form;
 
-  const onSubmit = (data: dataType) => {
-    console.log(data);
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
   };
-  const onErrorHandler = (error: FieldErrors) => {
+
+  const onSubmit = async (data: dataType) => {
+    try {
+      const token = cookies.Authorization || getCookie('Authorization');
+
+      console.log('توکن احراز هویت:', token);
+
+      if (!token) {
+        setLoginError('توکن احراز هویت یافت نشد. لطفاً ابتدا وارد شوید.');
+        return;
+      }
+
+      const formData = new FormData();
+      if (fileRef.current) {
+        formData.append('icon', fileRef.current);
+      } else {
+        setLoginError('لطفاً یک فایل آیکون انتخاب کنید');
+        return;
+      }
+
+      const response = await axios.post(
+        `https://109.230.200.230:7890/api/v1/Admins/Reservation-Spaces/Features?feature=${encodeURIComponent(data.feature || '')}`,
+        formData,
+        {
+          headers: {
+            "Authorization": `${token}`, // یا فقط ${token}، بسته به نیاز سرور
+            "Content-Type": "multipart/form-data",
+            "accept": "image/svg+xml",
+          },
+          httpsAgent: new (require('https').Agent)({ rejectUnauthorized: false }),
+        }
+      );
+
+      console.log('Response status:', response.status);
+      if (response.status === 200) {
+        setLoginError('ویژگی با موفقیت اضافه شد');
+        document.getElementById("my_modal_10")?.close();
+      }
+    } catch (error: any) {
+      console.error('Error response:', error.response?.data || error.message);
+      setLoginError(
+        error.response?.data?.message ||
+          (error.response?.status === 401
+            ? 'احراز هویت ناموفق. لطفاً با بک‌اند هماهنگ کنید.'
+            : error.response?.status === 400
+            ? 'درخواست نامعتبر است. لطفاً ورودی‌ها را بررسی کنید.'
+            : 'خطا در ارسال درخواست')
+      );
+    }
+  };
+
+  const onErrorHandler = (error: FieldErrors<dataType>) => {
     console.log(error);
   };
-  const [file, setFile] = useState(null);
+
   const { getRootProps, getInputProps } = useDropzone({
-    accept: "image/*,application/pdf",
+    accept: "image/svg+xml",
     onDrop: (acceptedFiles) => {
-      setFile(acceptedFiles[0]);
+      fileRef.current = acceptedFiles[0];
     },
   });
 
@@ -76,7 +137,7 @@ const Features = () => {
       </h1>
       <div className="flex justify-end">
         <button
-          onClick={() => document.getElementById("my_modal_3").showModal()}
+          onClick={() => document.getElementById("my_modal_10")?.showModal()}
           className="bg-[#253359] text-[16px] font-xmedium flex items-center justify-center gap-2 text-white w-[300px] py-3 rounded-lg mt-6"
         >
           <GoPlusCircle className="w-6 h-6" />
@@ -100,7 +161,7 @@ const Features = () => {
               <input
                 type="checkbox"
                 className="toggle border-none bg-white [--tglbg:#CBCBCB] hover:[--tglbg:#44C0ED] hover:bg-white"
-                defaultChecked
+                defaultChecked={item.enabled}
               />
               <button className="text-gray-400">
                 <LuTrash2 className="w-[22px] h-[22px] text-[#ADADAD]" />
@@ -109,10 +170,13 @@ const Features = () => {
           </div>
         ))}
       </div>
-      <dialog id="my_modal_3" className="modal w-full max-w-[400px] mx-auto">
+      <dialog id="my_modal_10" className="modal w-full max-w-[400px] mx-auto">
         <div className="modal-box">
           <form method="dialog">
-            <button className="btn btn-sm btn-circle btn-ghost absolute left-3 top-2">
+            <button
+              className="btn btn-sm btn-circle btn-ghost absolute left-3 top-2"
+              onClick={() => document.getElementById("my_modal_10")?.close()}
+            >
               ✕
             </button>
           </form>
@@ -121,7 +185,7 @@ const Features = () => {
               <div className="flex flex-col gap-[6px] w-full mt-3">
                 <label
                   className="text-[14px] font-xbold text-[#404040] "
-                  htmlFor="discription"
+                  htmlFor="feature"
                 >
                   عنوان امکان
                 </label>
@@ -129,27 +193,31 @@ const Features = () => {
                   className="placeholder-[#868686] font-xregular text-[14px] py-[7.5px] mt-1 md:py-[12.5px] px-3 rounded-lg border border-[#CBCBCB]"
                   placeholder=" نام امکان را وارد نمایید "
                   type="text"
-                  id="username"
-                  {...register("username", {
-                    required: "پر کردن فیلد قیمت اجباری است ",
+                  id="feature"
+                  {...register("feature", {
+                    required: "پر کردن فیلد عنوان اجباری است ",
                   })}
                 />
-                <p className="error">{errors.username?.message}</p>
+                <p className="error text-red-500">{errors.feature?.message}</p>
               </div>
               <div
                 {...getRootProps()}
                 className="border-dashed border-2 border-[#44C0ED] bg-[#ECF9FD] rounded-lg cursor-pointer flex justify-center mt-4 lg:mt-6 py-[11.5px] w-full"
               >
                 <input {...getInputProps()} />
-                {file ? (
-                  <p className="text-green-500">{file.name}</p>
+                {fileRef.current ? (
+                  <p className="text-green-500">{fileRef.current.name}</p>
                 ) : (
                   <p className="text-[#253359] flex items-center text-[14px] font-xregular gap-[6px]">
                     <GrAttachment /> برای افزودن آیکون امکان جدید کلیک نمایید
                   </p>
                 )}
               </div>
-              <button className="text-white bg-[#253359] text-[14px] font-xmedium py-[9.5px] w-full rounded-lg mt-6">
+              {loginError && <p className="text-red-500 text-[12px]">{loginError}</p>}
+              <button
+                type="submit"
+                className="text-white bg-[#253359] text-[14px] font-xmedium py-[9.5px] w-full rounded-lg mt-6"
+              >
                 افزودن امکان
               </button>
             </form>
@@ -165,7 +233,7 @@ const Features = () => {
         </div>
         <div className="join flex items-center justify-center w-full mr-[-190px] text-[14px] font-xregular gap-[9px]">
           <button className="bg-[#EDEDED] p-[6px] rounded-[6.67px]">
-            <IoIosArrowForward className="w-4 h-4 text-[#606060]  rounded-[4px]" />
+            <IoIosArrowForward className="w-4 h-4 text-[#606060] rounded-[4px]" />
           </button>
           <button className="bg-[#F1F8FF] px-[10.8px] py-[2.8px] rounded-[6.67px]">
             1
@@ -177,7 +245,7 @@ const Features = () => {
             3
           </button>
           <button className="bg-[#EDEDED] p-[6px] rounded-[6.67px]">
-            <IoIosArrowBack className="w-4 h-4 text-[#606060] " />
+            <IoIosArrowBack className="w-4 h-4 text-[#606060]" />
           </button>
         </div>
       </div>

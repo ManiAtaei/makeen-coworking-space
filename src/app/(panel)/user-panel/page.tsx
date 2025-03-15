@@ -21,6 +21,7 @@ import { LuGift } from "react-icons/lu";
 export default function page() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedComponent, setSelectedComponent] = useState(<UserProfile />);
+  const [activeMenu, setActiveMenu] = useState("مشخصات کاربری");
 
   const hamberger = () => {
     setIsOpen(!isOpen);
@@ -30,7 +31,6 @@ export default function page() {
   ];
 
   const itemLayout = [
- 
     {
       id: 1,
       icon: <TbUserSquareRounded size={24} />,
@@ -62,6 +62,12 @@ export default function page() {
       component: <Notifications />,
     },
   ];
+
+  const handleMenuClick = (title, component) => {
+    setSelectedComponent(component);
+    setActiveMenu(title);
+    if (isOpen) setIsOpen(false);
+  };
 
   return (
     <>
@@ -99,9 +105,13 @@ export default function page() {
           <div className="px-6 mt-5">
             {Inventory.map((item) => (
               <div key={item.id}>
-                <span onClick={()=>setSelectedComponent(<Wallet/>)} className="flex items-center text-[#253359] text-[12px] font-xbold mb-[10px]">
+                <span 
+                  onClick={() => handleMenuClick("کیف پول", <Wallet/>)} 
+                  className={`flex items-center text-[#253359] text-[12px] font-xbold mb-[10px] cursor-pointer ${activeMenu === "کیف پول" ? "text-[#7557E1]" : ""}`}
+                >
                   مدیریت کیف پول شما
-                  <IoIosArrowBack className="w-4 h-4 text-black" />
+                  <IoIosArrowBack className={`w-4 h-4 ${activeMenu === "کیف پول" ? "text-[#7557E1]" : "text-black"}`} />
+                  {activeMenu === "کیف پول" && <div className="absolute right-0 w-1 h-6 bg-[#4073D0] rounded-l-md"></div>}
                 </span>
                 <span className="text-[12px] font-xregular text-[#606060]">
                   موجودی <span className="text-[#202020]">
@@ -124,17 +134,36 @@ export default function page() {
           </div>
           <hr className="text-[#DFDFDF] mx-6 mt-6" />
 
-          <div className="mx-6 pt-[28px] lg:pt-0 lg:mt-4">
+          <div className="mx-6 pt-[28px] lg:pt-0 lg:mt-4 relative">
             {itemLayout.map((item) => (
               <div
                 key={item.id}
-                onClick={() => setSelectedComponent(item.component)}
-                className="cursor-pointer flex items-center gap-4 text-[#868686] px-4 py-[11.5px] text-[14px] font-xregular hover:bg-[#F4F5FC] hover:rounded-lg lg:mt-2 "
+                onClick={() => handleMenuClick(item.title, item.component)}
+                className={`cursor-pointer flex items-center gap-4 px-4 py-[11.5px] text-[14px] font-xregular hover:bg-[#F4F5FC] hover:rounded-lg lg:mt-2 relative ${
+                  activeMenu === item.title ? "bg-[#F4F5FC] rounded-lg text-[#7557E1]" : "text-[#868686]"
+                }`}
               >
-                {item.icon}
+                <span className={activeMenu === item.title ? "text-[#7557E1]" : ""}>{item.icon}</span>
                 {item.title}
+                {activeMenu === item.title && (
+                  <div className="absolute right-0 w-1 h-10 bg-[#4073D0] rounded-l-md"></div>
+                )}
               </div>
             ))}
+            <div
+              onClick={() => handleMenuClick("مدیریت رزروها اضافی", <ReservationManagement />)}
+              className={`cursor-pointer flex items-center gap-4 px-4 py-[11.5px] text-[14px] font-xregular hover:bg-[#F4F5FC] hover:rounded-lg lg:mt-2 relative ${
+                activeMenu === "مدیریت رزروها اضافی" ? "bg-[#F4F5FC] rounded-lg text-[#7557E1]" : "text-[#868686]"
+              }`}
+            >
+              <span className={activeMenu === "مدیریت رزروها اضافی" ? "text-[#7557E1]" : ""}>
+                <LuCalendarFold size={24} />
+              </span>
+              {" مدیریت رزروها "}
+              {activeMenu === "مدیریت رزروها اضافی" && (
+                <div className="absolute right-0 w-1 h-10 bg-[#4073D0] rounded-l-md"></div>
+              )}
+            </div>
           </div>
         </div>
         <div className="hidden lg:flex lg:items-center lg:justify-between lg:bg-white lg:mr-[260px] lg:w-full py-[27.5px] px-8 rounded-b-lg  ">
@@ -179,16 +208,36 @@ export default function page() {
           </div>
         </div>
 
-        <div className="pr-8 pt-[28px] ">
+        <div className="pr-8 pt-[28px] relative">
           {itemLayout.map((item) => (
             <div
               key={item.id}
-              className="flex items-center gap-4 text-[#868686] pt-6 text-[14px] font-xregular"
+              onClick={() => handleMenuClick(item.title, item.component)}
+              className={`flex items-center gap-4 pt-6 text-[14px] font-xregular cursor-pointer relative ${
+                activeMenu === item.title ? "text-[#7557E1]" : "text-[#868686]"
+              }`}
             >
-              {item.icon}
+              <span className={activeMenu === item.title ? "text-[#7557E1]" : ""}>{item.icon}</span>
               {item.title}
+              {activeMenu === item.title && (
+                <div className="absolute right-0 w-1 h-6 bg-[#4073D0] rounded-l-md"></div>
+              )}
             </div>
           ))}
+          <div
+            onClick={() => handleMenuClick("مدیریت رزروها اضافی", <ReservationManagement />)}
+            className={`flex items-center gap-4 pt-6 text-[14px] font-xregular cursor-pointer relative ${
+              activeMenu === "مدیریت رزروها اضافی" ? "text-[#7557E1]" : "text-[#868686]"
+            }`}
+          >
+            <span className={activeMenu === "مدیریت رزروها اضافی" ? "text-[#7557E1]" : ""}>
+              <LuCalendarFold size={24} />
+            </span>
+            {" مدیریت رزروها "}
+            {activeMenu === "مدیریت رزروها اضافی" && (
+              <div className="absolute right-0 w-1 h-6 bg-[#4073D0] rounded-l-md"></div>
+            )}
+          </div>
         </div>
       </div>
     </>
