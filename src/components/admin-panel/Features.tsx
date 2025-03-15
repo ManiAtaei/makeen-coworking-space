@@ -1,57 +1,27 @@
-import React, { useRef, useState } from "react";
-import { CiWifiOn } from "react-icons/ci";
-import { PiCoffeeLight } from "react-icons/pi";
-import { PiOfficeChair } from "react-icons/pi";
-import { GrCafeteria } from "react-icons/gr";
-import { LuProjector } from "react-icons/lu";
-import { PiLockers } from "react-icons/pi";
-import { TiArrowDownOutline } from "react-icons/ti";
-import { AiOutlineSafety } from "react-icons/ai";
-import { TbArmchair } from "react-icons/tb";
-import { LuTreePine } from "react-icons/lu";
+"use client";
+import React, { useRef, useState, useEffect } from "react";
 import { FaCaretLeft } from "react-icons/fa";
 import { LuTrash2 } from "react-icons/lu";
 import { GoPlusCircle } from "react-icons/go";
 import { GrAttachment } from "react-icons/gr";
 import { FieldErrors, useForm } from "react-hook-form";
 import { useDropzone } from "react-dropzone";
-import { IoIosArrowForward } from "react-icons/io";
-import { IoIosArrowBack } from "react-icons/io";
+import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
 import axios from "axios";
-import { useCookies } from "react-cookie";
+
+interface FeatureData {
+  Feature: string;
+  Icon: string;
+  enabled?: boolean;
+}
+
+interface dataType {
+  feature: string;
+}
 
 const Features = () => {
-  const features = [
-    { icon: <CiWifiOn size={24} />, label: " اینترنت وافای", enabled: true },
-    { icon: <PiCoffeeLight size={24} />, label: "چای قهوه", enabled: true },
-    {
-      icon: <PiOfficeChair size={24} />,
-      label: " مبلمان اداری ",
-      enabled: true,
-    },
-    { icon: <GrCafeteria size={24} />, label: " کافتریا ", enabled: true },
-    {
-      icon: <LuProjector size={24} />,
-      label: " ویدیو پروژکتور ",
-      enabled: false,
-    },
-    { icon: <PiLockers size={24} />, label: "  کمد شخصی ", enabled: false },
-    {
-      icon: <TiArrowDownOutline size={24} />,
-      label: " قیمت اقتصادی ",
-      enabled: true,
-    },
-    { icon: <AiOutlineSafety size={24} />, label: " امنیت ", enabled: false },
-    { icon: <TbArmchair size={24} />, label: "صندلی اختصاصی ", enabled: true },
-    { icon: <LuTreePine size={24} />, label: " فضای سبز ", enabled: true },
-  ];
-
-  interface dataType {
-    feature: string;
-  }
-
-  const [cookies] = useCookies(['Authorization']);
-  const [loginError, setLoginError] = useState('');
+  const [loginError, setLoginError] = useState("");
+  const [features, setFeatures] = useState<FeatureData[]>([]);
   const fileRef = useRef<File | null>(null);
 
   const form = useForm<dataType>({});
@@ -61,59 +31,85 @@ const Features = () => {
     register,
   } = form;
 
-  const getCookie = (name) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-    return null;
-  };
+  useEffect(() => {
+    const fetchFeatures = async () => {
+      try {
+        const response = await axios.get<FeatureData[]>(
+          "https://109.230.200.230:7890/api/v1/Admins/Reservation-Spaces/Features",
+          {
+            withCredentials: true,
+          }
+        );
+
+        console.log("خروجی API امکانات:", response.data);
+
+        const formattedFeatures = response.data.map((item) => ({
+          Feature: item.Feature,
+          Icon: item.Icon,
+          enabled: true,
+        }));
+
+        setFeatures(formattedFeatures);
+      } catch (error) {
+        console.error("خطا در دریافت امکانات:", error.response?.data || error.message);
+        setLoginError("خطا در دریافت امکانات از سرور");
+      }
+    };
+
+    fetchFeatures();
+  }, []);
 
   const onSubmit = async (data: dataType) => {
     try {
-      const token = cookies.Authorization || getCookie('Authorization');
-
-      console.log('توکن احراز هویت:', token);
-
-      if (!token) {
-        setLoginError('توکن احراز هویت یافت نشد. لطفاً ابتدا وارد شوید.');
+      if (!fileRef.current) {
+        setLoginError("لطفاً یک فایل آیکون انتخاب کنید");
         return;
       }
 
       const formData = new FormData();
-      if (fileRef.current) {
-        formData.append('icon', fileRef.current);
-      } else {
-        setLoginError('لطفاً یک فایل آیکون انتخاب کنید');
-        return;
-      }
+      formData.append("icon", fileRef.current); // آیکون به‌صورت باینری
 
       const response = await axios.post(
-        `https://109.230.200.230:7890/api/v1/Admins/Reservation-Spaces/Features?feature=${encodeURIComponent(data.feature || '')}`,
+        `https://109.230.200.230:7890/api/v1/Admins/Reservation-Spaces/Features?feature=${encodeURIComponent(
+          data.feature
+        )}`,
         formData,
         {
-          headers: {
-            "Authorization": `${token}`, // یا فقط ${token}، بسته به نیاز سرور
-            "Content-Type": "multipart/form-data",
-            "accept": "image/svg+xml",
-          },
-          httpsAgent: new (require('https').Agent)({ rejectUnauthorized: false }),
+          withCredentials: true, // فقط withCredentials برای احراز هویت
         }
       );
 
-      console.log('Response status:', response.status);
-      if (response.status === 200) {
-        setLoginError('ویژگی با موفقیت اضافه شد');
+      console.log("Response status:", response.status);
+      console.log("Response data:", response.data); // لاگ کردن پاسخ API
+
+      if (response.status === 200 || response.status === 201) {
+        setLoginError("ویژگی با موفقیت اضافه شد");
+
+        // تبدیل فایل آپلودشده به Base64 برای نمایش در لیست
+        const reader = new FileReader();
+        reader.readAsDataURL(fileRef.current);
+        reader.onloadend = () => {
+          setFeatures((prev) => [
+            ...prev,
+            {
+              Feature: data.feature,
+              Icon: reader.result as string,
+              enabled: true,
+            },
+          ]);
+        };
+
         document.getElementById("my_modal_10")?.close();
       }
-    } catch (error: any) {
-      console.error('Error response:', error.response?.data || error.message);
+    } catch (error) {
+      console.error("Error response:", error.response?.data || error.message);
       setLoginError(
         error.response?.data?.message ||
           (error.response?.status === 401
-            ? 'احراز هویت ناموفق. لطفاً با بک‌اند هماهنگ کنید.'
+            ? "احراز هویت ناموفق. لطفاً با بک‌اند هماهنگ کنید."
             : error.response?.status === 400
-            ? 'درخواست نامعتبر است. لطفاً ورودی‌ها را بررسی کنید.'
-            : 'خطا در ارسال درخواست')
+            ? "درخواست نامعتبر است. لطفاً ورودی‌ها را بررسی کنید."
+            : "خطا در ارسال درخواست")
       );
     }
   };
@@ -123,7 +119,7 @@ const Features = () => {
   };
 
   const { getRootProps, getInputProps } = useDropzone({
-    accept: "image/svg+xml",
+    accept: "image/svg+xml,image/png,image/jpeg", // پشتیبانی از فرمت‌های مختلف
     onDrop: (acceptedFiles) => {
       fileRef.current = acceptedFiles[0];
     },
@@ -145,6 +141,9 @@ const Features = () => {
         </button>
       </div>
 
+      {loginError && (
+        <p className="text-red-500 text-[12px] mt-4">{loginError}</p>
+      )}
       <div className="grid grid-cols-2 gap-6 mt-6">
         {features.map((item, index) => (
           <div
@@ -152,9 +151,13 @@ const Features = () => {
             className="flex items-center justify-between py-[19px] pr-8 pl-4 bg-[#F4F5FC] rounded-lg shadow-sm"
           >
             <div className="flex items-center gap-4 text-[#253359]">
-              {item.icon}
+              <img
+                src={item.Icon}
+                alt={item.Feature}
+                className="w-6 h-6 object-cover"
+              />
               <span className="text-right text-[#202020] font-xregular text-[14px]">
-                {item.label}
+                {item.Feature}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -184,18 +187,18 @@ const Features = () => {
             <form noValidate onSubmit={handleSubmit(onSubmit, onErrorHandler)}>
               <div className="flex flex-col gap-[6px] w-full mt-3">
                 <label
-                  className="text-[14px] font-xbold text-[#404040] "
+                  className="text-[14px] font-xbold text-[#404040]"
                   htmlFor="feature"
                 >
                   عنوان امکان
                 </label>
                 <input
                   className="placeholder-[#868686] font-xregular text-[14px] py-[7.5px] mt-1 md:py-[12.5px] px-3 rounded-lg border border-[#CBCBCB]"
-                  placeholder=" نام امکان را وارد نمایید "
+                  placeholder="نام امکان را وارد نمایید"
                   type="text"
                   id="feature"
                   {...register("feature", {
-                    required: "پر کردن فیلد عنوان اجباری است ",
+                    required: "پر کردن فیلد عنوان اجباری است",
                   })}
                 />
                 <p className="error text-red-500">{errors.feature?.message}</p>
@@ -213,7 +216,9 @@ const Features = () => {
                   </p>
                 )}
               </div>
-              {loginError && <p className="text-red-500 text-[12px]">{loginError}</p>}
+              {loginError && (
+                <p className="text-red-500 text-[12px]">{loginError}</p>
+              )}
               <button
                 type="submit"
                 className="text-white bg-[#253359] text-[14px] font-xmedium py-[9.5px] w-full rounded-lg mt-6"
@@ -227,8 +232,9 @@ const Features = () => {
       <div className="flex items-center mt-[35px] w-full">
         <div className="w-3/12">
           <span className="text-[#868686] font-xregular text-[12px]">
-            نمایش <span className="text-[#202020] font-xbold">8</span> از 68
-            نتیجه
+            نمایش{" "}
+            <span className="text-[#202020] font-xbold">{features.length}</span>{" "}
+            از 68 نتیجه
           </span>
         </div>
         <div className="join flex items-center justify-center w-full mr-[-190px] text-[14px] font-xregular gap-[9px]">
