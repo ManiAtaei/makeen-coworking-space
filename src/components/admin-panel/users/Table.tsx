@@ -1,4 +1,4 @@
-
+"use client"
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import React, { useEffect } from "react";
@@ -67,7 +67,6 @@ export default function Table() {
     fetchData();
   }, []);
 
-
   const handleDeleteClick = (user: UserData) => {
     setSelectedUser(user);
     setIsModalOpen(true);
@@ -77,14 +76,14 @@ export default function Table() {
     if (!selectedUser) return;
 
     try {
-      
+      // ارسال درخواست PATCH برای بن کردن کاربر
       await axios.patch(
         `https://109.230.200.230:7890/api/v1/Admins/${selectedUser.id}/Ban`,
         {},
         { withCredentials: true }
       );
 
-  
+      // به‌روزرسانی لیست کاربران پس از بن شدن
       setInfo((prevInfo) => prevInfo.filter((item) => item.id !== selectedUser.id));
       setIsModalOpen(false);
       setSelectedUser(null);
@@ -98,25 +97,6 @@ export default function Table() {
     setIsModalOpen(false);
     setSelectedUser(null);
   };
-
-  const dataUser = async () => {
-    try {
-      const response = await fetch("https://109.230.200.230:7890/api/v1/Admins/Users", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await response.json(); // تبدیل response به JSON
-      console.log(data); // نمایش دیتا در کنسول
-    } catch (error) {
-      console.log("Error fetching data:", error);
-    }
-  }
-  useEffect(() => {
-    dataUser();
-  }, [])
-
 
   return (
     <div>
