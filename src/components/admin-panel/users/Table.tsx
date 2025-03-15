@@ -1,63 +1,49 @@
-"use client"
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import React, { useEffect } from "react";
 import { LuUserRoundX } from "react-icons/lu";
 import { SlEye } from "react-icons/sl";
 import { CiMoneyBill } from "react-icons/ci";
-import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
-import DeleteModal from "./DeleteModal";
-
-interface UserData {
-  id: string;
-  row: string;
-  email: string;
-  name: string;
-  date: string;
-  card: string;
-  number: string;
-  image: string;
-}
-
-interface ApiResponse {
-  id: string;
-  email: string | null;
-  firstName: string;
-  lastName: string;
-  creationTime: string;
-  nationalCode: string;
-  phoneNumber: string;
-  hasProfilePhoto: boolean;
-}
+import { IoIosArrowForward } from "react-icons/io";
+import { IoIosArrowBack } from "react-icons/io";
 
 export default function Table() {
-  const [info, setInfo] = useState<UserData[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
+  const [info, setInfo] = useState([
+    {
+      id: 1,
+      row: "1",
+      email: "Mina.Akbari@gmail.com",
+      name: "محمد ایمانی",
+      date: "۱۳۰۴/۱۰/۱۳",
+      card: "۰۸۲۰۱۲۰۱۲۳۴",
+      image: "/admin-panel/Profile-Pic-Small.svg",
+      number: "۰۹۱۲۹۸۷۶۵۴۳",
+    },
+  ]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get<ApiResponse[]>(
-          "https://109.230.200.230:7890/api/v1/Admins/Users?page=1&pageSize=10&orderBy=CreationTime&sortOrder=DESC",
-          { withCredentials: true }
+        
+
+        const response = await axios.get(
+          "https://109.230.200.230:7890/api/v1/Admins/Users?page=1&pageSize=8&orderBy=CreationTime&sortOrder=DESC",
+          {
+           
+            withCredentials: true,
+          }
         );
 
-        const formattedData: UserData[] = response.data.map((item, index) => ({
-          id: item.id,
-          row: (index + 1).toString(),
-          email: item.email || "نامشخص",
-          name: `${item.firstName} ${item.lastName}`,
-          date: new Date(item.creationTime).toLocaleDateString("fa-IR"),
-          card: item.nationalCode,
-          number: item.phoneNumber,
-          image: item.hasProfilePhoto ? "/path/to/profile-pic" : "/admin-panel/Profile-Pic-Small.svg",
-        }));
-
-        setInfo(formattedData);
+        console.log("API Response:", response.data);
+        setInfo(response.data);
         setError(null);
-      } catch (error: any) {
+      } catch (error) {
+        console.error("Error fetching data:", {
+          message: error.message,
+          response: error.response?.data || "No response",
+          status: error.response?.status || "Unknown",
+          headers: error.config?.headers, 
+        });
         setError(
           `خطا در بارگذاری داده‌ها: ${error.message} (وضعیت: ${error.response?.status || "نامشخص"})`
         );
@@ -66,37 +52,6 @@ export default function Table() {
 
     fetchData();
   }, []);
-
-  const handleDeleteClick = (user: UserData) => {
-    setSelectedUser(user);
-    setIsModalOpen(true);
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!selectedUser) return;
-
-    try {
-      // ارسال درخواست PATCH برای بن کردن کاربر
-      await axios.patch(
-        `https://109.230.200.230:7890/api/v1/Admins/${selectedUser.id}/Ban`,
-        {},
-        { withCredentials: true }
-      );
-
-      // به‌روزرسانی لیست کاربران پس از بن شدن
-      setInfo((prevInfo) => prevInfo.filter((item) => item.id !== selectedUser.id));
-      setIsModalOpen(false);
-      setSelectedUser(null);
-    } catch (error: any) {
-      setError(`خطا در بن کردن کاربر: ${error.message}`);
-      setIsModalOpen(false);
-    }
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedUser(null);
-  };
 
   return (
     <div>
@@ -142,10 +97,9 @@ export default function Table() {
                 <td>{item.card}</td>
                 <td>{item.number}</td>
                 <td className="flex items-center gap-3 text-[#ADADAD]">
-                  <button onClick={() => handleDeleteClick(item)}>
-                    <LuUserRoundX className="w-[22px] h-[22px] hover:text-red-500" />
-                  </button>
+                  <LuUserRoundX className="w-[22px] h-[22px]" />
                   <SlEye className="w-[22px] h-[22px]" />
+                  <CiMoneyBill className="w-6 h-6" />
                 </td>
               </tr>
             ))}
@@ -155,7 +109,7 @@ export default function Table() {
       <div className="flex items-center mt-[35px] w-full">
         <div className="w-3/12">
           <span className="text-[#868686] font-xregular text-[12px]">
-            نمایش <span className="text-[#202020] font-xbold">{info.length}</span> از 68 نتیجه
+            نمایش <span className="text-[#202020] font-xbold">8</span> از 68 نتیجه
           </span>
         </div>
         <div className="join flex items-center justify-center w-full mr-[-190px] text-[14px] font-xregular gap-[9px]">
@@ -176,14 +130,6 @@ export default function Table() {
           </button>
         </div>
       </div>
-
-      <DeleteModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onConfirm={handleConfirmDelete}
-        userName={selectedUser?.name || ""}
-        userId={selectedUser?.id || ""} // ارسال ID به مودال
-      />
     </div>
   );
 }
