@@ -1,92 +1,45 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { FieldErrors, useForm } from "react-hook-form";
 import { FaCaretLeft } from "react-icons/fa";
 import { GoArrowRight } from "react-icons/go";
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
 import { MdEdit } from "react-icons/md";
 import { GoKey } from "react-icons/go";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
-export default function UserProfile() {
-  interface dataType {
-    username: string;
-    email: string;
-    description: string;
-    firstName: string;
-    lastName: string;
-    birthDate: string;
-    nationalId: string;
-    phoneNumber: string;
-    gender: string;
-  }
+interface DataType {
+  firstName: string;
+  lastName: string;
+  birthDate: string;
+  email: string;
+  nationalCode?: string;
+  phoneNumber?: string;
+  gender?: boolean;
+}
 
-  const [profileImage, setProfileImage] = useState(
-    "/user-panel/Ellipse 120.svg"
-  );
+interface UserProfileProps {
+  userData: DataType | null;
+  profilePhoto: string | null;
+}
+
+export default function UserProfile({ userData, profilePhoto }: UserProfileProps) {
+  const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [editableFields, setEditableFields] = useState<string[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const formMap = [
-    {
-      id: 1,
-      name: "نام",
-      info: "مریم",
-      field: "firstName",
-      placeholder: "نام خود را وارد نمایید",
-      error: "پر کردن فیلد نام کاربر اجباری است",
-    },
-    {
-      id: 2,
-      name: "نام خانوادگی",
-      info: "علی پور",
-      field: "lastName",
-      placeholder: "نام خانوادگی خود را وارد نمایید",
-      error: "پر کردن فیلد نام خانوادگی اجباری است",
-    },
-
-    {
-      id: 3,
-      name: "کد ملی",
-      info: "۰۸۲۰۱۲۳۰۱۲۳",
-      field: "nationalId",
-      placeholder: "کد ملی خود را وارد نمایید",
-      error: "پر کردن فیلد کد ملی اجباری است",
-    },
-    {
-      id: 4,
-      name: "تاریخ تولد",
-      info: "۱۳۸۰/۸/۱۸",
-      field: "birthDate",
-      placeholder: "تاریخ تولد خود را وارد نمایید",
-      error: "پر کردن فیلد تاریخ تولد اجباری است",
-    },
-
-    {
-      id: 5,
-      name: "شماره موبایل",
-      info: "۰۹۱۲۸۷۶۵۴۳",
-      field: "phoneNumber",
-      placeholder: "شماره موبایل خود را وارد نمایید",
-      error: "پر کردن فیلد شماره موبایل اجباری است",
-    },
-    {
-      id: 6,
-      name: "ایمیل",
-      info: "maryam.alipour@gmail.com",
-      field: "email",
-      placeholder: "ایمیل خود را وارد نمایید",
-      error: "پر کردن فیلد ایمیل اجباری است",
-    },
-  ];
-
-  const form = useForm<dataType>({
+  const form = useForm<DataType>({
     defaultValues: {
-      firstName: "مریم",
-      lastName: "علی پور",
-      birthDate: "۱۳۸۰/۸/۱۸",
-      nationalId: "۰۸۲۰۱۲۳۰۱۲۳",
-      email: "maryam.alipour@gmail.com",
-      phoneNumber: "۰۹۱۲۸۷۶۵۴۳",
-      gender: "خانم",
+      firstName: "",
+      lastName: "",
+      birthDate: "",
+      email: "",
+      nationalCode: "",
+      phoneNumber: "",
+      gender: false,
     },
   });
 
@@ -95,15 +48,131 @@ export default function UserProfile() {
     formState: { errors },
     register,
     setValue,
-    getValues,
+    reset,
   } = form;
 
-  const onSubmit = (data: dataType) => {
-    console.log(data);
-    setIsEditing(false);
+  const passwordForm = useForm<{
+    password: string;
+    newPassword: string;
+  }>({
+    defaultValues: {
+      password: "",
+      newPassword: "",
+    },
+  });
+
+  const {
+    handleSubmit: handlePasswordSubmit,
+    register: registerPassword,
+    formState: { errors: passwordErrors },
+    reset: resetPasswordForm,
+  } = passwordForm;
+
+  useEffect(() => {
+    if (userData) {
+      setValue("firstName", userData.firstName);
+      setValue("lastName", userData.lastName);
+      setValue("birthDate", userData.birthDate.split("T")[0]);
+      setValue("email", userData.email);
+      userData.nationalCode && setValue("nationalCode", userData.nationalCode);
+      userData.phoneNumber && setValue("phoneNumber", userData.phoneNumber);
+      userData.gender !== undefined && setValue("gender", userData.gender);
+    }
+    if (profilePhoto) {
+      setProfileImage(profilePhoto);
+    }
+  }, [userData, profilePhoto, setValue]);
+
+  const formMap = [
+    {
+      id: 1,
+      name: "نام",
+      field: "firstName",
+      placeholder: "نام خود را وارد نمایید",
+      error: "پر کردن فیلد نام کاربر اجباری است",
+      editable: true,
+    },
+    {
+      id: 2,
+      name: "نام خانوادگی",
+      field: "lastName",
+      placeholder: "نام خانوادگی خود را وارد نمایید",
+      error: "پر کردن فیلد نام خانوادگی اجباری است",
+      editable: true,
+    },
+    {
+      id: 3,
+      name: "کد ملی",
+      field: "nationalCode",
+      placeholder: "کد ملی خود را وارد نمایید",
+      error: "پر کردن فیلد کد ملی اجباری است",
+      editable: false,
+    },
+    {
+      id: 4,
+      name: "تاریخ تولد",
+      field: "birthDate",
+      placeholder: "تاریخ تولد خود را وارد نمایید",
+      error: "پر کردن فیلد تاریخ تولد اجباری است",
+      editable: true,
+    },
+    {
+      id: 5,
+      name: "شماره موبایل",
+      field: "phoneNumber",
+      placeholder: "شماره موبایل خود را وارد نمایید",
+      error: "پر کردن فیلد شماره موبایل اجباری است",
+      editable: false,
+    },
+    {
+      id: 6,
+      name: "ایمیل",
+      field: "email",
+      placeholder: "ایمیل خود را وارد نمایید",
+      error: "پر کردن فیلد ایمیل اجباری است",
+      editable: true,
+    },
+  ];
+
+  const onSubmit = async (data: DataType) => {
+    try {
+      const updatedData: Partial<DataType> = {};
+      
+      // Only include fields that were edited
+      editableFields.forEach(field => {
+        updatedData[field as keyof DataType] = data[field as keyof DataType];
+      });
+
+      const profileData = {
+        ...(updatedData.firstName && { firstName: updatedData.firstName }),
+        ...(updatedData.lastName && { lastName: updatedData.lastName }),
+        ...(updatedData.birthDate && { birthDate: new Date(updatedData.birthDate).toISOString() }),
+        ...(updatedData.email && { email: updatedData.email }),
+      };
+
+      const response = await fetch("https://109.230.200.230:7890/api/v1/Users/Profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(profileData),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("خطا در به‌روزرسانی پروفایل");
+      }
+
+      alert("مشخصات با موفقیت به‌روزرسانی شد");
+      setIsEditing(false);
+      setEditableFields([]);
+    } catch (error) {
+      console.log("Error updating profile:", error);
+      alert("خطا در به‌روزرسانی پروفایل");
+    }
   };
 
-  const onErrorHandler = (errors: FieldErrors<dataType>) => {
+  const onErrorHandler = (errors: FieldErrors<DataType>) => {
     console.log(errors, "errors");
   };
 
@@ -113,9 +182,14 @@ export default function UserProfile() {
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.type !== "image/png") {
+        alert("لطفاً فقط فایل‌های PNG را آپلود کنید.");
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
@@ -124,26 +198,90 @@ export default function UserProfile() {
       };
       reader.readAsDataURL(file);
 
-      uploadFile(file)
+      await uploadFile(file);
     }
   };
 
   const toggleEdit = () => {
-    setIsEditing(!isEditing);
+    if (!isEditing) {
+      // When entering edit mode, identify which fields are editable
+      const editableFieldNames = formMap
+        .filter(item => item.editable)
+        .map(item => item.field);
+      
+      setEditableFields(editableFieldNames);
+      setIsEditing(true);
+    } else {
+      // When canceling edit mode, reset the form to original values
+      if (userData) {
+        setValue("firstName", userData.firstName);
+        setValue("lastName", userData.lastName);
+        setValue("birthDate", userData.birthDate.split("T")[0]);
+        setValue("email", userData.email);
+      }
+      setIsEditing(false);
+      setEditableFields([]);
+    }
   };
-  const uploadFile = async (selectedFile:File) => {
+
+  const uploadFile = async (selectedFile: File) => {
     try {
       const formData = new FormData();
       formData.append("file", selectedFile);
-      const response = await fetch(
-        "https://109.230.200.230:7890/api/v1/Users",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+
+      const response = await fetch("https://109.230.200.230:7890/api/v1/Users/Profile-Photo", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload profile photo");
+      }
+
+      const photoResponse = await fetch("https://109.230.200.230:7890/api/v1/Users/Profile-Photo", {
+        method: "GET",
+        credentials: "include",
+      });
+      const photoBlob = await photoResponse.blob();
+      const updatedPhotoUrl = URL.createObjectURL(photoBlob);
+      setProfileImage(updatedPhotoUrl);
+
+      console.log("Profile photo uploaded successfully");
     } catch (error) {
-      console.log("Error fetching data:", error);
+      console.log("Error uploading profile photo:", error);
+      alert("خطا در آپلود عکس پروفایل");
+    }
+  };
+
+  const handleChangePassword = async (data: { password: string; newPassword: string }) => {
+    try {
+      const response = await fetch("https://109.230.200.230:7890/api/v1/Users/Change-Password", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          password: data.password,
+          newPassword: data.newPassword,
+        }),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        const errorMessage = errorData.errors
+          ? Object.values(errorData.errors).flat().join("\n")
+          : "خطا در تغییر رمز عبور";
+        throw new Error(errorMessage);
+      }
+
+      alert("رمز عبور با موفقیت تغییر یافت");
+      setIsModalOpen(false);
+      resetPasswordForm();
+    } catch (error: any) {
+      console.log("Error changing password:", error);
+      alert(error.message || "خطا در تغییر رمز عبور");
     }
   };
 
@@ -164,18 +302,20 @@ export default function UserProfile() {
       <div className="flex justify-center mt-[17px] relative">
         <div className="relative cursor-pointer" onClick={handleImageClick}>
           <img
-            src={profileImage}
+            src={profileImage || ""}
             alt="تصویر پروفایل"
             className="w-28 h-28 rounded-full object-cover border-[6px] border-[#4073D0]"
           />
-          <div className="absolute bottom-1 w-9 h-9 right-1 bg-[#FF9568] rounded-full p-2">
-            <MdEdit className="text-white w-5 h-5" />
-          </div>
+          {isEditing && (
+            <div className="absolute bottom-1 w-9 h-9 right-1 bg-[#FF9568] rounded-full p-2">
+              <MdEdit className="text-white w-5 h-5" onClick={handleImageClick} />
+            </div>
+          )}
           <input
             type="file"
             ref={fileInputRef}
             onChange={handleImageChange}
-            accept="image/*"
+            accept="image/png"
             className="hidden"
           />
         </div>
@@ -184,37 +324,34 @@ export default function UserProfile() {
       <div className="mt-2 px-[72px]">
         <form noValidate onSubmit={handleSubmit(onSubmit, onErrorHandler)}>
           <button
-            type="button"
-            onClick={toggleEdit}
+            type={isEditing ? "submit" : "button"}
+            onClick={!isEditing ? toggleEdit : undefined}
             className="bg-[#253359] text-[14px] font-xmedium text-white w-full py-2 rounded-lg md:hidden"
           >
-            {isEditing ? "ثبت تغییرات" : "ویرایش مشخصات"}
+            {isEditing ? "تأیید" : "ویرایش مشخصات"}
           </button>
 
           <div className="md:grid md:grid-cols-2 md:gap-8">
             {formMap.map((item) => (
               <div key={item.id} className="flex flex-col pt-2">
-                <label
-                  className="text-[14px] font-xbold text-[#202020]"
-                  htmlFor={item.field}
-                >
+                <label className="text-[14px] font-xbold text-[#202020]" htmlFor={item.field}>
                   {item.name}
                 </label>
                 <input
                   className={`placeholder-[#868686] font-xregular text-[14px] py-[7.5px] w-full max-w-[392px] md:py-[12.5px] px-3 mt-[5px] rounded-lg border border-[#CBCBCB] ${
-                    !isEditing ? "text-[#868686]" : "text-[#202020]"
+                    !isEditing || !item.editable ? "text-[#868686] bg-gray-100" : "text-[#202020]"
                   }`}
                   placeholder={item.placeholder}
-                  type="text"
+                  type={item.field === "birthDate" ? "date" : "text"}
                   id={item.field}
-                  disabled={!isEditing}
-                  {...register(item.field as keyof dataType, {
+                  disabled={!isEditing || !item.editable}
+                  {...register(item.field as keyof DataType, {
                     required: item.error,
                   })}
                 />
-                {errors[item.field as keyof dataType] && (
+                {errors[item.field as keyof DataType] && (
                   <p className="text-red-500 text-xs mt-1">
-                    {errors[item.field as keyof dataType]?.message}
+                    {errors[item.field as keyof DataType]?.message}
                   </p>
                 )}
               </div>
@@ -222,38 +359,37 @@ export default function UserProfile() {
 
             <div className="flex items-center justify-between md:justify-normal gap-8 mt-4">
               <div className="flex items-center gap-1">
-                <span className="text-[#202020] text-[14px] font-xbold">
-                  آپلود مدارک:
-                </span>
+                <span className="text-[#202020] text-[14px] font-xbold">آپلود مدارک:</span>
                 <IoCheckmarkCircleOutline className="text-[#00BA88] bg-transparent w-5 h-5 rounded-full" />
-                <button
-                  type="button"
-                  className="text-[12px] font-xregular underline underline-offset-4"
-                >
+                <button type="button" className="text-[12px] font-xregular underline underline-offset-4">
                   مشاهده
                 </button>
               </div>
 
               <div className="flex items-center gap-1">
-                <span className="text-[#202020] text-[14px] font-xbold">
-                  جنسیت:
-                </span>
+                <span className="text-[#202020] text-[14px] font-xbold">جنسیت:</span>
                 <div className="flex items-center gap-2">
                   <label className="flex items-center gap-1">
                     <input
                       type="radio"
-                      value="آقا"
+                      value="false"
                       disabled={!isEditing}
-                      {...register("gender")}
+                      {...register("gender", {
+                        setValueAs: (value) => value === "false" ? false : true,
+                      })}
+                      checked={userData?.gender === false}
                     />
                     <span className="text-[12px] font-xregular">آقا</span>
                   </label>
                   <label className="flex items-center gap-1">
                     <input
                       type="radio"
-                      value="خانم"
+                      value="true"
                       disabled={!isEditing}
-                      {...register("gender")}
+                      {...register("gender", {
+                        setValueAs: (value) => value === "false" ? false : true,
+                      })}
+                      checked={userData?.gender === true}
                     />
                     <span className="text-[12px] font-xregular">خانم</span>
                   </label>
@@ -261,43 +397,87 @@ export default function UserProfile() {
               </div>
             </div>
 
-            {isEditing ? (
-              <div className="mt-4 flex gap-4 col-span-2 md:col-span-1">
-                <button
-                  type="button"
-                  onClick={toggleEdit}
-                  className="bg-white border border-[#253359] text-[16px] font-xmedium text-[#253359] w-full max-w-[188px] py-[11px] rounded-lg"
-                >
-                  انصراف
-                </button>
-                <button
-                  type="submit"
-                  className="bg-[#253359] text-[16px] font-xmedium text-white w-full max-w-[188px] py-[11px] rounded-lg"
-                >
-                  ثبت تغییرات
-                </button>
-              </div>
-            ) : (
-              <div className="mt-4 flex gap-4 col-span-2 md:col-span-1">
-                <button
-                  type="button"
-                  onClick={toggleEdit}
-                  className="bg-white border border-[#253359] text-[16px] font-xmedium text-[#253359] w-full max-w-[188px] rounded-lg flex items-center justify-center gap-2"
-                >
-                  <GoKey /> تغییر رمز ورود
-                </button>
-                <button
-                  type="button"
-                  onClick={toggleEdit}
-                  className="bg-[#253359] text-[16px] font-xmedium text-white py-[12px] w-full max-w-[188px] rounded-lg hidden md:block"
-                >
-                  ویرایش مشخصات
-                </button>
-              </div>
-            )}
+            <div className="mt-4 flex gap-4 col-span-2 md:col-span-1">
+              <button
+                type="button"
+                onClick={isEditing ? toggleEdit : () => setIsModalOpen(true)}
+                className="bg-white border border-[#253359] text-[16px] font-xmedium text-[#253359] w-full max-w-[188px] rounded-lg flex items-center justify-center gap-2"
+              >
+                {isEditing ? "کنسل" : <><GoKey /> تغییر رمز ورود</>}
+              </button>
+              <button
+                type={isEditing ? "submit" : "button"}
+                onClick={!isEditing ? toggleEdit : undefined}
+                className="bg-[#253359] text-[16px] font-xmedium text-white py-[12px] w-full max-w-[188px] rounded-lg hidden md:block"
+              >
+                {isEditing ? "تأیید" : "ویرایش مشخصات"}
+              </button>
+            </div>
           </div>
         </form>
       </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-xbold">تغییر رمز عبور</h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-500">
+                ✕
+              </button>
+            </div>
+            <form onSubmit={handlePasswordSubmit(handleChangePassword)} className="flex flex-col gap-4">
+              <div className="relative">
+                <label className="text-sm font-xbold">رمز عبور فعلی</label>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  {...registerPassword("password", {
+                    required: "رمز عبور فعلی اجباری است",
+                  })}
+                  placeholder="رمز عبور فعلی را وارد نمایید"
+                  className="w-full p-2 mt-1 border border-gray-300 rounded-lg pr-10"
+                />
+                {passwordErrors.password && (
+                  <p className="text-red-500 text-xs mt-1">{passwordErrors.password.message}</p>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-10 text-gray-500"
+                  aria-label={showPassword ? "مخفی کردن رمز عبور" : "نمایش رمز عبور"}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+              <div className="relative">
+                <label className="text-sm font-xbold">رمز عبور جدید</label>
+                <input
+                  type={showNewPassword ? "text" : "password"}
+                  {...registerPassword("newPassword", {
+                    required: "رمز عبور جدید اجباری است",
+                  })}
+                  placeholder="رمز عبور جدید را وارد نمایید"
+                  className="w-full p-2 mt-1 border border-gray-300 rounded-lg pr-10"
+                />
+                {passwordErrors.newPassword && (
+                  <p className="text-red-500 text-xs mt-1">{passwordErrors.newPassword.message}</p>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-10 text-gray-500"
+                  aria-label={showNewPassword ? "مخفی کردن رمز عبور" : "نمایش رمز عبور"}
+                >
+                  {showNewPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+              <button type="submit" className="bg-[#253359] text-white py-2 rounded-lg mt-4">
+                ثبت رمز عبور
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

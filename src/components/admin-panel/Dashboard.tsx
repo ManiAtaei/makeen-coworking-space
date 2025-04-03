@@ -1,11 +1,13 @@
 "use client";
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { RiMore2Fill } from "react-icons/ri";
 import { FaCaretLeft } from "react-icons/fa";
-import ChartBar from "./chartBar";
 import { FaSquare } from "react-icons/fa";
-import LineChart from "./lineChart";
+
+// Lazy loading برای کامپوننت‌های سنگین
+const ChartBar = lazy(() => import("./chartBar"));
+const LineChart = lazy(() => import("./lineChart"));
 
 export default function Dashboard() {
   interface dataType {
@@ -51,7 +53,6 @@ export default function Dashboard() {
   ];
 
   const form = useForm<dataType>({});
-
   const { handleSubmit, register } = form;
 
   const onSubmit = (data: dataType) => {
@@ -64,13 +65,13 @@ export default function Dashboard() {
         <FaCaretLeft className="w-6 h-6 hidden lg:block" />
         داشبورد
       </h1>
-      <div className=" lg:bg-white lg:w-full lg:px-8 lg:py-6 lg:rounded-[16px]">
+      <div className="lg:bg-white lg:w-full lg:px-8 lg:py-6 lg:rounded-[16px]">
         <div className="flex items-center justify-between mt-6 lg:mt-0 w-full">
-          <span className="text-[#253359] text-[14px] font-xbold ">
+          <span className="text-[#253359] text-[14px] font-xbold">
             آمار رزرو روزانه
           </span>
           <form noValidate onSubmit={handleSubmit(onSubmit)}>
-            <div className="">
+            <div>
               <select
                 id="select"
                 {...register("select")}
@@ -83,7 +84,7 @@ export default function Dashboard() {
           </form>
         </div>
         <div className="w-full mt-4 md:flex md:item-center md:gap-4 md:mt-6 lg:grid lg:grid-cols-1 lg:justify-center xl:flex xl:item-center containerPage:gap-[37.5px]">
-          <div className="flex items-center gap-4  containerPage:gap-[37.5px] justify-center w-full">
+          <div className="flex items-center gap-4 containerPage:gap-[37.5px] justify-center w-full">
             {Statistics.map((item) => (
               <div
                 key={item.id}
@@ -94,7 +95,8 @@ export default function Dashboard() {
                     <img
                       className="md:w-10 md:h-10"
                       src={item.imageUrl}
-                      alt="img"
+                      alt={item.title} // متن alt توصیفی
+                      loading="lazy" // Lazy loading برای تصویر
                     />
                     <span className="text-[12px] md:text-[14px] font-xbold hidden md:block md:mr-2 lg:mr-4">
                       {item.title}
@@ -105,7 +107,6 @@ export default function Dashboard() {
                 <span className="text-[12px] md:text-[14px] font-xbold mt-2 md:hidden">
                   {item.title}
                 </span>
-
                 <div className="md:flex md:items-center md:justify-between md:flex-row-reverse md:w-full tablet:px-4">
                   <div
                     className="rounded-full flex items-center justify-center border-[6px] border-[#44C0ED] text-black text-[12px] md:text-[14px] font-xbold w-12 h-12 mt-2 md:mt-4 md:w-16 md:h-16"
@@ -128,7 +129,11 @@ export default function Dashboard() {
           </div>
           <div className="mt-4 md:mt-0 rounded-r-3xl bg-[#F4F5FC] rounded-l-2xl md:w-7/12 w-full border-r-4 border-[#4073D0] py-4 pr-6 pl-4 lg:justify-self-center">
             <div className="flex items-center justify-between">
-              <img src="/admin-panel/money-tick.svg" alt="img" />
+              <img
+                src="/admin-panel/money-tick.svg"
+                alt="رسید در انتظار بررسی"
+                loading="lazy" // Lazy loading برای تصویر
+              />
               <span className="text-[#404040] text-[12px] md:text-[14px] font-xbold">
                 رسیدهای در انتظار بررسی
               </span>
@@ -157,13 +162,13 @@ export default function Dashboard() {
       </div>
       <div className="flex flex-col item-center lg:flex lg:flex-row lg:items-center w-full lg:gap-3 xl:gap-[22px]">
         <div className="border-[#4073D0] border rounded-[16px] mt-4 pt-4 pb-2 px-[18.18px] lg:border-0 lg:bg-white w-full">
-          <div className="flex items-center justify-between  w-full">
-            <span className="text-[#253359] text-[12px] lg:text-[14px] font-xbold ">
+          <div className="flex items-center justify-between w-full">
+            <span className="text-[#253359] text-[12px] lg:text-[14px] font-xbold">
               نمودار رزروها
             </span>
-            <div className="flex items-center gap1">
+            <div className="flex items-center gap-1">
               <form noValidate onSubmit={handleSubmit(onSubmit)}>
-                <div className="">
+                <div>
                   <select
                     id="select"
                     {...register("select")}
@@ -178,7 +183,9 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="w-full">
-            <ChartBar />
+            <Suspense fallback={<div>در حال بارگذاری نمودار...</div>}>
+              <ChartBar />
+            </Suspense>
           </div>
           <div className="flex items-center gap-3 mt-[-30px]">
             <div className="flex items-center gap-2">
@@ -196,13 +203,13 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="border-[#4073D0] border rounded-[16px] mt-4 pt-4 pb-2 px-[18.18px] lg:border-0 lg:bg-white w-full">
-          <div className="flex items-center justify-between  w-full">
-            <span className="text-[#253359] text-[12px] lg:text-[14px] font-xbold ">
+          <div className="flex items-center justify-between w-full">
+            <span className="text-[#253359] text-[12px] lg:text-[14px] font-xbold">
               نمودار رزروها
             </span>
             <div className="flex items-center gap-1">
               <form noValidate onSubmit={handleSubmit(onSubmit)}>
-                <div className="">
+                <div>
                   <select
                     id="select"
                     {...register("select")}
@@ -217,7 +224,9 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="w-full">
-            <LineChart />
+            <Suspense fallback={<div>در حال بارگذاری نمودار...</div>}>
+              <LineChart />
+            </Suspense>
           </div>
           <div className="flex items-center gap-3 mt-[-60px]">
             <div className="flex items-center gap-2">

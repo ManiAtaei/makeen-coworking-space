@@ -67,7 +67,7 @@ const Features = () => {
       }
 
       const formData = new FormData();
-      formData.append("icon", fileRef.current); // آیکون به‌صورت باینری
+      formData.append("icon", fileRef.current);
 
       const response = await axios.post(
         `https://109.230.200.230:7890/api/v1/Admins/Reservation-Spaces/Features?feature=${encodeURIComponent(
@@ -75,17 +75,16 @@ const Features = () => {
         )}`,
         formData,
         {
-          withCredentials: true, // فقط withCredentials برای احراز هویت
+          withCredentials: true,
         }
       );
 
       console.log("Response status:", response.status);
-      console.log("Response data:", response.data); // لاگ کردن پاسخ API
+      console.log("Response data:", response.data);
 
       if (response.status === 200 || response.status === 201) {
         setLoginError("ویژگی با موفقیت اضافه شد");
 
-        // تبدیل فایل آپلودشده به Base64 برای نمایش در لیست
         const reader = new FileReader();
         reader.readAsDataURL(fileRef.current);
         reader.onloadend = () => {
@@ -119,7 +118,7 @@ const Features = () => {
   };
 
   const { getRootProps, getInputProps } = useDropzone({
-    accept: "image/svg+xml,image/png,image/jpeg", // پشتیبانی از فرمت‌های مختلف
+    accept: "image/svg+xml,image/png,image/jpeg",
     onDrop: (acceptedFiles) => {
       fileRef.current = acceptedFiles[0];
     },
@@ -155,6 +154,7 @@ const Features = () => {
                 src={item.Icon}
                 alt={item.Feature}
                 className="w-6 h-6 object-cover"
+                loading="lazy" // اضافه کردن Lazy Loading برای تصاویر
               />
               <span className="text-right text-[#202020] font-xregular text-[14px]">
                 {item.Feature}
