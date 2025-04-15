@@ -23,7 +23,7 @@ export default function Confirmation() {
 
   const inventory = [{ id: 1, total: "250,000" }];
   useEffect(() => {
-    const modal = document.getElementById("my_modal_3");
+    const modal = document.getElementById("my_modal_53");
     if (modal) {
       modal.showModal();
     }
@@ -31,8 +31,8 @@ export default function Confirmation() {
 
   const followUp = [{ id: 1, number: " 1732599713919849 " }];
   return (
-    <div className="px-5" >
-      <dialog id="my_modal_3" className="modal">
+    <div className="px-5">
+      <dialog id="my_modal_53" className="modal">
         <div className="modal-box">
           <form method="dialog">
             <button className="btn btn-sm btn-circle btn-ghost absolute left-3 top-2 w-5 h-5">
@@ -42,7 +42,7 @@ export default function Confirmation() {
           <div className="flex flex-col items-center w-full text-[#202020] text-[14px] font-xbold">
             <div className="bg-[#F4F5FC] pl-2 pr-3 py-[11.5px] rounded-lg mt-2">
               {inventory.map((item) => (
-                <div className="flex items-center justify-center gap-2">
+                <div key={item.id} className="flex items-center justify-center gap-2">
                   <PiMoneyLight className="w-7 h-7 text-[#868686]" />
                   <span className="text-[#404040] font-xregular text-[12px]">
                     موجودی فعلی شما:

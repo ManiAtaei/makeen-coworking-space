@@ -54,7 +54,7 @@ export default function Wallet() {
               </div>
               <button
                 onClick={() =>
-                  document.getElementById("my_modal_3").showModal()
+                  document.getElementById("my_modal_50").showModal()
                 }
                 className="md:mx-2 tablet:mx-8 flex items-center text-white text-[14px] font-xmedium bg-[#253359] w-full md:w-[272px] justify-center py-2 md:py-4 rounded-lg mt-10 gap-2 md:mt-0 lg:mt-10 xl:mt-0"
               >
@@ -68,7 +68,7 @@ export default function Wallet() {
           </div>
         ))}
       </div>
-      <dialog id="my_modal_3" className="modal">
+      <dialog id="my_modal_50" className="modal">
         <div className="modal-box">
           <form method="dialog">
             <button className="btn btn-sm btn-circle btn-ghost absolute left-3 top-2">

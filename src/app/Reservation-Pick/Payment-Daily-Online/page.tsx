@@ -25,13 +25,13 @@ export default function DailyOnline() {
       id: 3,
       title: " قیمت عادی ",
       Description: "100,000 تومان ",
-      res: "text-[#202020] text-[14px] font-xbold",
+      res: "text-[#202020] text-[14px] font-xregular",
     },
     {
       id: 4,
       title: " قیمت دانشجو مکین ",
       Description: "60,000 تومان",
-      res: " text-[#3BC377] text-[14px] font-xbold ",
+      res: " text-[#3BC377] text-[14px] font-xregular ",
     },
     {
       id: 5,
@@ -43,19 +43,13 @@ export default function DailyOnline() {
       id: 6,
       title: " تخفیف ",
       Description: " ۵٪ رزرو بلند مدت ",
-      res: " text-[#00BA88] text-[14px] font-xregular ",
+      res: " text-[#3BC377] text-[14px] font-xbold ",
     },
     {
       id: 7,
-      title: " اعتبار کیف پول ",
-      Description: "0 تومان ",
-      res: " text-[#00BA88] text-[14px] font-xregular ",
-    },
-    {
-      id: 8,
       title: " مبلغ قابل پرداخت ",
       Description: "270,000 تومان",
-      res: "text-[#202020] text-[14px] font-xbold",
+      res: "text-[#404040] text-[14px] font-xbold",
     },
   ];
 
@@ -76,23 +70,25 @@ export default function DailyOnline() {
             />
             پرداخت آنلاین
           </div>
-          <div className="mt-4 flex items-center text-[#202020] font-xregular text-[14px] gap-2">
-            <input
-              type="radio"
-              name="radio-7"
-              className="radio radio-info w-5 h-5"
-              defaultChecked
-            />
-            پرداخت از کیف پول
+          <div className="flex items-center mt-4 gap-1">
+            <div className=" flex items-center text-[#202020] font-xregular text-[14px] gap-2">
+              <input
+                type="radio"
+                name="radio-7"
+                className="radio radio-info w-5 h-5"
+                defaultChecked
+              />
+              پرداخت از کیف پول
+            </div>
+            {Inventory.map((item) => (
+              <span
+                key={item.id}
+                className="text-[#606060] text-[12px] font-xregular"
+              >
+                (موجودی {item.total} تومان)
+              </span>
+            ))}
           </div>
-          {Inventory.map((item) => (
-            <span
-              key={item.id}
-              className="text-[#606060] text-[12px] font-xregular mr-[30px]"
-            >
-              موجودی {item.total} تومان
-            </span>
-          ))}
         </div>
         <div className="border border-[#ADADAD] px-6 pt-6 pb-8 rounded-2xl w-[37%]">
           <h1 className="text-[#404040] font-xbold text-[16px]">
@@ -106,9 +102,7 @@ export default function DailyOnline() {
                   item.id === 4 ? "bg-[#F4FFF9]" : ""
                 }`}
               >
-                <span
-                  className={`text-[#404040] text-[14px] font-xregular ${item.res}`}
-                >
+                <span className={`text-[#404040] ${item.res}`}>
                   {item.title}
                 </span>
                 <span className={`${item.res}`}>{item.Description}</span>
