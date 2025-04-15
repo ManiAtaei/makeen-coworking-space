@@ -99,7 +99,7 @@ export default function Table() {
                 <td>
                   <SlEye
                     onClick={() =>
-                      document.getElementById("my_modal_3").showModal()
+                      document.getElementById("my_modal_51").showModal()
                     }
                     className="h-[22px] w-[22px] text-[#868686] cursor-pointer"
                   />
@@ -108,7 +108,7 @@ export default function Table() {
             ))}
           </tbody>
 
-          <dialog id="my_modal_3" className="modal">
+          <dialog id="my_modal_51" className="modal">
             <div className=" modal-box w-11/12 max-w-[817px] h-[440px]">
               <form className="lg:flex lg:items-center" method="dialog">
                 <button className="btn btn-sm btn-circle btn-ghost absolute left-3 top-2">

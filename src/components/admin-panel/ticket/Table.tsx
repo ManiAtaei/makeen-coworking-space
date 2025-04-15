@@ -1,52 +1,144 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { HiOutlineExclamationCircle } from "react-icons/hi2";
-import { IoCloseCircleOutline, IoCheckmarkCircleOutline } from "react-icons/io5";
+import {
+  IoCloseCircleOutline,
+  IoCheckmarkCircleOutline,
+} from "react-icons/io5";
 import { SlEye } from "react-icons/sl";
 import { IoIosArrowForward } from "react-icons/io";
 import { IoIosArrowBack } from "react-icons/io";
+import SupportTicket from "./SupportTicket";
+import axios from "axios";
 
-export default function Table() {
-  const info = [
-    {
-      id: 1,
-      row: "1001",
-      method: "کارت به کارت",
-      image: "/admin-panel/Profile-Pic-Small.svg",
-      name: "محمد ایمانی",
-      date: "۱۳۰۴/۱۰/۱۳",
-      status: "answered", 
-    },
-    {
-      id: 2,
-      row: "1002",
-      method: "کارت به کارت",
-      image: "/admin-panel/Profile-Pic-Small.svg",
-      name: "مینا رحیمی",
-      date: "۱۳۰۴/۱۰/۱۴",
-      status: "pending", 
-    },
-    {
-      id: 3,
-      row: "1003",
-      method: "انتقال وجه",
-      image: "/admin-panel/Profile-Pic-Small.svg",
-      name: "علی محمدی",
-      date: "۱۳۰۴/۱۰/۱۵",
-      status: "closed", 
-    },
-    {
-      id: 4,
-      row: "1004",
-      method: "درخواست وام",
-      image: "/admin-panel/Profile-Pic-Small.svg",
-      name: "زهرا حسینی",
-      date: "۱۳۰۴/۱۰/۱۶",
-      status: "open",
-    },
-  ];
+export default function Table({ ticketType }) {
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+
+  useEffect(() => {
+    fetchTickets();
+  }, [ticketType]);
+
+  const fetchTickets = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        "https://109.230.200.230:7890/api/v1/Admins/Tickets",
+        {
+          params: {
+            page: 1,
+            pageSize: 10,
+            orderBy: "CreationTime",
+            sortOrder: "DESC",
+            ticketType: ticketType || undefined,
+          },
+          withCredentials: true,
+        }
+      );
+
+      // تبدیل داده‌های API به فرمت مورد نیاز کامپوننت
+      const formattedTickets = response.data.map((ticket, index) => ({
+        id: ticket.id,
+        row: (index + 1).toString(),
+        method: ticket.title,
+        image: ticket.image,
+        name: `${ticket.firstName} ${ticket.lastName}`,
+        date: new Date(ticket.creationTime).toLocaleDateString("fa-IR"),
+        status: mapStatus(ticket.ticketStatus), // تبدیل وضعیت API به وضعیت کامپوننت
+        ticketId: ticket.id,
+        messages: [], // در ابتدا خالی است و هنگام باز کردن تیکت پر می‌شود
+      }));
+
+      setTickets(formattedTickets);
+    } catch (error) {
+      console.error("خطا در دریافت تیکت‌ها:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // تابع تبدیل وضعیت تیکت
+  const mapStatus = (status) => {
+    switch (status) {
+      case "Pending":
+        return "pending";
+      case "Answered":
+        return "answered";
+      case "Closed":
+        return "closed";
+      case "Open":
+        return "open";
+      default:
+        return "pending";
+    }
+  };
+
+  const handleOpenModal = async (ticket) => {
+    try {
+      const response = await axios.get(
+        `https://109.230.200.230:7890/api/v1/Admins/Tickets/${ticket.ticketId}/Messages`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      // تبدیل پیام‌های API به فرمت مورد نیاز کامپوننت
+      const formattedMessages = response.data.map((msg) => ({
+        id: msg.id,
+        text: msg.text,
+        time: new Date(msg.creationTime).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        sender: msg.fromAdmin ? "support" : "user",
+        attachment: msg.hasAttachment ? msg.id : undefined,
+      }));
+
+      setSelectedTicket({
+        ...ticket,
+        messages: formattedMessages,
+      });
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error("خطا در دریافت پیام‌های تیکت:", error);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedTicket(null);
+  };
+
+  const handleSendMessage = (ticketId: string, text: string) => {
+    setSelectedTicket((prev) =>
+      prev
+        ? {
+            ...prev,
+            messages: [
+              ...prev.messages,
+              {
+                id: `${prev.messages.length + 1}`,
+                text,
+                time: new Date().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }),
+                sender: "support",
+              },
+            ],
+          }
+        : null
+    );
+  };
+
+  const handleCloseTicket = (ticketId) => {
+    // Handle closing the ticket, you might want to update the state or call an API
+    console.log(`Closing ticket ${ticketId}`);
+  };
 
   return (
-    <div>
+    <div className="relative">
       <div className="overflow-x-auto">
         <table className="table">
           <thead className="bg-[#ECF9FD]">
@@ -65,7 +157,7 @@ export default function Table() {
             </tr>
           </thead>
           <tbody>
-            {info.map((item) => (
+            {tickets.map((item) => (
               <tr
                 key={item.id}
                 className="odd:bg-[#F9F9F9] even:bg-[#FFFFFF] text-[14px] font-xregular text-[#202020]"
@@ -105,8 +197,10 @@ export default function Table() {
                     </span>
                   )}
                 </td>
-                <td>            
-                    <SlEye className="h-[22px] w-[22px] text-[#868686]" />
+                <td>
+                  <button onClick={() => handleOpenModal(item)}>
+                    <SlEye className="h-[22px] w-[22px] text-[#868686] cursor-pointer hover:text-[#44C0ED]" />
+                  </button>
                 </td>
               </tr>
             ))}
@@ -138,6 +232,26 @@ export default function Table() {
           </button>
         </div>
       </div>
+
+      {/* Modal */}
+      {isModalOpen && selectedTicket && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-[16px] w-full max-w-[780px] mx-auto overflow-hidden ">
+            <SupportTicket
+              ticketId={selectedTicket.ticketId}
+              ticketSubject={selectedTicket.method}
+              ticketDate={selectedTicket.date}
+              ticketStatus={selectedTicket.status}
+              messages={selectedTicket.messages}
+              onSendMessage={(text) =>
+                handleSendMessage(selectedTicket.ticketId, text)
+              }
+              onCloseTicket={() => handleCloseTicket(selectedTicket.ticketId)}
+              onClose={handleCloseModal}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

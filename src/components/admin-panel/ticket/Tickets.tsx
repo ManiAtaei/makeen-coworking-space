@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaCaretLeft } from "react-icons/fa";
 import { LuCalendarFold } from "react-icons/lu";
@@ -10,6 +10,7 @@ export default function Tickets() {
   }
 
   const search = useForm<emailType>({});
+  const [ticketType, setTicketType] = useState(null);
 
   const { handleSubmit, register } = search;
 
@@ -37,12 +38,16 @@ export default function Tickets() {
             >
               <div className="flex items-center w-full">
                 <select
-                  id="select"
                   {...register("select")}
-                  className="text-[14px] font-xregular text-[#606060] border border-[#ADADAD] w-[160px] rounded-[8px] px-4 py-2 md:py-[9.5px] "
+                  onChange={(e) => setTicketType(e.target.value || null)}
+                  className="text-[14px] font-xregular text-[#606060] border border-[#ADADAD] w-[160px] rounded-[8px] px-4 py-2 md:py-[9.5px]"
                 >
-                  <option value="option1"> وضعیت تیکت </option>
-                  <option value="option2"> همه </option>
+                  <option value="">همه تیکت‌ها</option>
+                  <option value="جدیدترین">جدیدترین</option>
+                  <option value="در انتظار پاسخ">در انتظار پاسخ</option>
+                  <option value="باز">باز</option>
+                  <option value="تایید شده">تایید شده</option>
+                  <option value="بسته">بسته</option>
                 </select>
               </div>
               <div className="flex items-center border w-full border-[#ADADAD] rounded-lg py-2 px-4">
@@ -86,7 +91,7 @@ export default function Tickets() {
         </div>
       </div>
       <div className="mt-6">
-        <Table />
+        <Table ticketType={ticketType} />
       </div>
     </div>
   );

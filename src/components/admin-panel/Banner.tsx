@@ -4,12 +4,14 @@ import { FaCaretLeft } from "react-icons/fa";
 import { SlEye } from "react-icons/sl";
 import { LuTrash2 } from "react-icons/lu";
 import { useDropzone } from "react-dropzone";
+import axios from "axios";
 
 export default function Banner() {
   interface dataType {
-    titr1: string;
-    titr2: string;
+    firstTitle: string;
+    secondTitle: string;
   }
+
   const form = useForm<dataType>({});
 
   const {
@@ -21,24 +23,28 @@ export default function Banner() {
   const onSubmit = async () => {
     try {
       const formData = new FormData();
-      formData.append("firstTitle", form.getValues("titr1"));
-      formData.append("secondTitle", form.getValues("titr2"));
+      const firstTitle = form.getValues("firstTitle");
+      const secondTitle = form.getValues("secondTitle");
+      formData.append("firstTitle", firstTitle);
+      formData.append("secondTitle", secondTitle);
       if (file) {
         formData.append("file", file);
+      } else {
+        console.warn("No file selected");
       }
 
-      const response = await fetch(
-        "https://109.230.200.230:7890/api/v1/Admins/Web-Site-Setting",
-        {
-          method: "PUT",
-          body: formData,
-        }
-      );
+      const url = `https://109.230.200.230:7890/api/v1/Admins/Web-Site-Setting?firstTitle=${firstTitle}&secondTitle=${secondTitle}`;
 
-      const data = await response.json();
-      console.log(data);
+      const response = await axios.put(url, formData, {
+        withCredentials: true,
+      });
+      console.log(response.data);
     } catch (error) {
-      console.log("Error fetching data:", error);
+      if (error.response) {
+        console.log("Server Response:", error.response.data);
+      } else {
+        console.log("Error:", error.message);
+      }
     }
   };
 
@@ -63,24 +69,24 @@ export default function Banner() {
       <div className="mt-6 max-w-[905px]">
         <form noValidate onSubmit={handleSubmit(onSubmit, onErrorHandler)}>
           <div className="flex flex-col text-[#404040] font-xbold text-[14px]">
-            <label htmlFor="titr1"> تیتر اول(بزرگ) </label>
+            <label htmlFor="firstTitle"> تیتر اول(بزرگ) </label>
             <input
               className="placeholder-[#868686] py-[10px] px-1 mt-1 rounded-lg border border-[#CBCBCB] hover:border-blue-500"
               type="text"
-              id="titr1"
-              {...register("titr1")}
+              id="firstTitle"
+              {...register("firstTitle")}
             />
-            <p className="error">{errors.titr1?.message}</p>
+            <p className="error">{errors.firstTitle?.message}</p>
           </div>
           <div className="flex flex-col text-[#404040] font-xbold text-[14px] mt-6">
-            <label htmlFor="titr1"> تیتر دوم(کوچک) </label>
+            <label htmlFor="secondTitle"> تیتر دوم(کوچک) </label>
             <input
               className="placeholder-[#868686] py-[10px] px-1 mt-1 rounded-lg border border-[#CBCBCB]"
               type="text"
-              id="titr1"
-              {...register("titr1")}
+              id="secondTitle"
+              {...register("secondTitle")}
             />
-            <p className="error">{errors.titr1?.message}</p>
+            <p className="error">{errors.secondTitle?.message}</p>
           </div>
           <div className="flex justify-between items-center w-full mt-6 gap-16 max-w-[905px]">
             <div
@@ -102,7 +108,7 @@ export default function Banner() {
               type="submit"
               className="bg-[#253359] text-[16px] font-xmedium flex items-center justify-center text-white py-3 rounded-lg w-full"
             >
-              <span className=""> ثبت ویرایش </span>
+              ثبت ویرایش
             </button>
           </div>
         </form>
