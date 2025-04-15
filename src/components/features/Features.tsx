@@ -6,49 +6,49 @@ export default function Features() {
       id: 1,
       image: "/iconLanding/Vector.svg",
       title: " قیمت مناسب ",
-      res : "block"
+
     },
     {
       id: 2,
       image: "/iconLanding/Projector.svg",
       title: " ویدیو پروژکتور ",
-      res : "hidden lg:block lg:flex lg:item-center lg:justify-center"
+   
     },
     {
       id: 3,
       image: "/iconLanding/Group.svg",
       title: " نوشیدنی گرم ",
-      res : "hidden md:block md:flex md:item-center md:justify-center"
+   
     },
     {
       id: 4,
       image: "/iconLanding/Vector2.svg",
       title: " کمد شخصی ",
-      res : "block"
+
     },
     {
       id: 5,
       image: "/iconLanding/Group2.svg",
       title: " کافی تریا ",
-      res : "block"
+   
     },
     {
       id: 6,
       image: "/iconLanding/Vector3.svg",
       title: " مبلمان اداری ",
-      res : "hidden md:block md:flex md:item-center md:justify-center"
+    
     },
     {
       id: 7,
       image: "/iconLanding/wifi.svg",
       title: " اینترنت پرسرعت ",
-        res : "block"
+  
     },
     {
       id: 8,
       image: "/iconLanding/Group3.svg",
       title: " امنیت ",
-      res : "hidden lg:block lg:flex lg:item-center lg:justify-center"
+      
     },
   ];
 
@@ -56,14 +56,14 @@ export default function Features() {
     <div className="relative mt-[-10px]">
       <div className="flex flex-col items-center gap-4 ">
         <h1 className="text-2xl font-xbold mt-10"> امکانات مکین </h1>
-        <div dir="ltr" className="grid-cols-2 grid-rows-2 md:grid-cols-3  grid lg:grid-cols-4  gap-4 mobileNum:gap-10 lg:gap-4">
+        <div dir="rtl" className="grid-cols-2 grid-rows-2 md:grid-cols-4 grid lg:grid-cols-4  gap-4 mobileNum:gap-10 lg:gap-4">
           {features.map((item) => (
             <div
               key={item.id}
-              className={`bg-[#F4F5FC] flex flex-col items-center justify-center gap-2 py-[30px] ${item.res}`}
+              className={`bg-[#F4F5FC] flex lg:flex-col items-center justify-center gap-2 lg:py-[30px] rounded-lg py-4 px-1`}
             >
-              <img className="px-[56px] " src={item.image} alt="img" />
-              <span className="text-[#253359] mt-4 font-xregular text-xl">
+              <img className="size-8 lg:size-11" src={item.image} alt="img" />
+              <span className="text-[#253359] font-xregular text-[12px] lg:text-[20px]">
                 {item.title}
               </span>
             </div>
