@@ -1,44 +1,46 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { HiOutlineExclamationCircle } from "react-icons/hi2";
 import { IoCloseCircleOutline } from "react-icons/io5";
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
 import { SlEye } from "react-icons/sl";
 
 export default function Table() {
-  const info = [
-    {
-      id: 1,
-      row: "1001",
-      title: " عدم تایید پرداخت ",
-      number: "۱۲۳۴۵۶۷۸۹۰",
-      date: "۱۳۰۴/۱۰/۱۳",
-      status: "answered",
-    },
-    {
-      id: 2,
-      row: "1001",
-      title: " عدم تایید پرداخت ",
-      number: "۱۲۳۴۵۶۷۸۹۰",
-      date: "۱۳۰۴/۱۰/۱۳",
-      status: "pending",
-    },
-    {
-      id: 3,
-      row: "1001",
-      title: " عدم تایید پرداخت ",
-      number: "۱۲۳۴۵۶۷۸۹۰",
-      date: "۱۳۰۴/۱۰/۱۳",
-      status: "closed",
-    },
-    {
-      id: 4,
-      row: "1001",
-      title: " عدم تایید پرداخت ",
-      number: "۱۲۳۴۵۶۷۸۹۰",
-      date: "۱۳۰۴/۱۰/۱۳",
-      status: "open",
-    },
-  ];
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        const response = await axios.get('https://109.230.200.230:7890/api/v1/Users/Ticket', {
+          withCredentials: true
+        });
+        setTickets(Array.isArray(response.data) ? response.data : [response.data]);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching tickets:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchTickets();
+  }, []);
+
+  const convertToIranTime = (utcDate) => {
+    const date = new Date(utcDate);
+    date.setHours(date.getHours() + 3);
+    date.setMinutes(date.getMinutes() + 30);
+    
+    return new Intl.DateTimeFormat('fa-IR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(date).replace(/(\d+)\/(\d+)\/(\d+)/, '$3/$2/$1');
+  };
+
+  if (loading) {
+    return <div>در حال بارگذاری...</div>;
+  }
 
   return (
     <div>
@@ -55,35 +57,25 @@ export default function Table() {
             </tr>
           </thead>
           <tbody>
-            {info.map((item) => (
+            {tickets.map((item, index) => (
               <tr
                 key={item.id}
                 className="odd:bg-[#F9F9F9] even:bg-[#FFFFFF] text-[14px] font-xregular text-[#202020]"
               >
-                <td>{item.row}</td>
+                <td>{index + 1}</td>
                 <td>{item.title}</td>
-                <td>{item.number}</td>
-                <td>{item.date}</td>
+                <td>{item.id.split('-')[0]}</td> {/* Using first part of UUID as ticket number */}
+                <td>{convertToIranTime(item.creationTime)}</td>
                 <td>
-                  {item.status === "pending" ? (
-                    <span className="border border-[#E0A03A] text-[#E0A03A] bg-[#FFFBF3] px-2 py-1 rounded-lg w-fit flex items-center gap-1">
-                      <HiOutlineExclamationCircle className="text-[#E0A03A] bg-transparent w-5 h-5 rounded-full" />
-                      در انتظار پاسخ
-                    </span>
-                  ) : item.status === "answered" ? (
-                    <span className="border border-[#3BC377] text-[#227346] bg-[#F4FFF9] px-1 py-1 rounded-lg w-fit flex items-center gap-1">
-                      <IoCheckmarkCircleOutline className="text-[#3BC377] bg-transparent w-5 h-5 rounded-full" />
-                      پاسخ داده شده
-                    </span>
-                  ) : item.status === "closed" ? (
-                    <span className="border border-[#606060] text-[#606060] bg-[#F4F5FC] px-2 py-1 rounded-lg w-fit flex items-center gap-1">
-                      <IoCloseCircleOutline className="text-[#606060] bg-transparent w-5 h-5 rounded-full" />
-                      بسته شده
-                    </span>
-                  ) : (
+                  {item.isActive ? (
                     <span className="border border-[#44C0ED] text-[#44C0ED] bg-[#ECF9FD] px-2 py-1 rounded-lg w-[100px] flex items-center gap-1">
                       <IoCheckmarkCircleOutline className="text-[#44C0ED] bg-transparent w-5 h-5 rounded-full" />
                       باز
+                    </span>
+                  ) : (
+                    <span className="border border-[#606060] text-[#606060] bg-[#F4F5FC] px-2 py-1 rounded-lg w-fit flex items-center gap-1">
+                      <IoCloseCircleOutline className="text-[#606060] bg-transparent w-5 h-5 rounded-full" />
+                      بسته شده
                     </span>
                   )}
                 </td>
