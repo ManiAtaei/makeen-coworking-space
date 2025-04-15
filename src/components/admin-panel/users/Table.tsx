@@ -1,57 +1,164 @@
+"use client"
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Cookies from "js-cookie";
 import { LuUserRoundX } from "react-icons/lu";
 import { SlEye } from "react-icons/sl";
-import { CiMoneyBill } from "react-icons/ci";
-import { IoIosArrowForward } from "react-icons/io";
-import { IoIosArrowBack } from "react-icons/io";
+import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
+import DeleteModal from "./DeleteModal";
 
-export default function Table() {
-  const [info, setInfo] = useState([
-    {
-      id: 1,
-      row: "1",
-      email: "Mina.Akbari@gmail.com",
-      name: "محمد ایمانی",
-      date: "۱۳۰۴/۱۰/۱۳",
-      card: "۰۸۲۰۱۲۰۱۲۳۴",
-      image: "/admin-panel/Profile-Pic-Small.svg",
-      number: "۰۹۱۲۹۸۷۶۵۴۳",
-    },
-  ]);
-  const [error, setError] = useState(null);
+interface UserData {
+  id: string;
+  row: string;
+  email: string;
+  name: string;
+  date: string;
+  card: string;
+  number: string;
+  image: string;
+}
+
+interface ApiResponse {
+  id: string;
+  email: string | null;
+  firstName: string;
+  lastName: string;
+  creationTime: string;
+  nationalCode: string;
+  phoneNumber: string;
+  hasProfilePhoto: boolean;
+}
+
+interface TableProps {
+  onSelectUsers: (selectedIds: string[]) => void;
+  userTypeFilter: number; // نوع کاربر (0: Newest, 1: Banned, 2: MakeenStudent, 3: ForcedCoWorks)
+}
+
+export default function Table({ onSelectUsers, userTypeFilter }: TableProps) {
+  const [info, setInfo] = useState<UserData[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize] = useState<number>(10); // تعداد کاربران در هر صفحه
+  const [totalUsers, setTotalUsers] = useState<number>(0); // تعداد کل کاربران
 
   useEffect(() => {
     const fetchData = async () => {
       try {
 
-        const response = await axios.get(
-          "https://109.230.200.230:7890/api/v1/Admins/Users?page=1&pageSize=8&orderBy=CreationTime&sortOrder=DESC",
-          {
-            
-            withCredentials: true,
-          }
+        const response = await axios.get<ApiResponse[]>(
+          `https://109.230.200.230:7890/api/v1/Admins/Users?page=${currentPage}&pageSize=${pageSize}&userType=${userTypeFilter}&orderBy=CreationTime&sortOrder=DESC`,
+          { withCredentials: true }
         );
 
-        console.log("API Response:", response.data);
-        setInfo(response.data);
-        setError(null);
-      } catch (error) {
-        console.error("Error fetching data:", {
-          message: error.message,
-          response: error.response?.data || "No response",
-          status: error.response?.status || "Unknown",
-          headers: error.config?.headers, // چک کردن هدرهای ارسالی
-        });
-        setError(
-          `خطا در بارگذاری داده‌ها: ${error.message} (وضعیت: ${error.response?.status || "نامشخص"})`
+        const formattedData: UserData[] = await Promise.all(
+          response.data.map(async (item, index) => {
+            let profileImage = "/admin-panel/Profile-Pic-Small.svg";
+
+            if (item.hasProfilePhoto) {
+              try {
+                const imageResponse = await axios.get(
+                  `https://109.230.200.230:7890/api/v1/Admins/Users/${item.id}/Profile-Photo`,
+                  {
+                    withCredentials: true,
+                    responseType: "blob",
+                  }
+                );
+
+                console.log(`پاسخ API عکس برای کاربر ${item.id}:`, imageResponse.data);
+
+                const reader = new FileReader();
+                reader.readAsDataURL(imageResponse.data);
+                reader.onloadend = () => {
+                  console.log(`Base64 عکس برای کاربر ${item.id}:`, reader.result);
+                };
+
+                profileImage = URL.createObjectURL(imageResponse.data);
+              } catch (imgError: any) {
+                console.error(`خطا در دریافت عکس پروفایل کاربر ${item.id}: ${imgError.message}`);
+              }
+            }
+
+            return {
+              id: item.id,
+              row: ((currentPage - 1) * pageSize + index + 1).toString(), // محاسبه شماره ردیف با توجه به صفحه
+              email: item.email || "نامشخص",
+              name: `${item.firstName} ${item.lastName}`,
+              date: new Date(item.creationTime).toLocaleDateString("fa-IR"),
+              card: item.nationalCode,
+              number: item.phoneNumber,
+              image: profileImage,
+            };
+          })
         );
+
+        setInfo(formattedData);
+        setError(null);
+        // فرض می‌کنیم API تعداد کل کاربران را در هدر یا بدنه پاسخ برمی‌گرداند
+        // اگر API تعداد کل را برمی‌گرداند، باید آن را اینجا تنظیم کنیم
+        setTotalUsers(68); // این مقدار باید از API گرفته شود (برای مثال از هدر یا بدنه پاسخ)
+      } catch (error: any) {
+        setError(`خطا در بارگذاری داده‌ها: ${error.message}`);
       }
     };
 
     fetchData();
-  }, []);
+
+    return () => {
+      info.forEach((item) => {
+        if (item.image.startsWith("blob:")) {
+          URL.revokeObjectURL(item.image);
+        }
+      });
+    };
+  }, [currentPage, userTypeFilter]); // هر بار که صفحه یا نوع کاربر تغییر کند، داده‌ها دوباره بارگذاری می‌شوند
+
+  const handleCheckboxChange = (id: string) => {
+    setSelectedIds((prev) => {
+      const newSelectedIds = prev.includes(id)
+        ? prev.filter((selectedId) => selectedId !== id)
+        : [...prev, id];
+      onSelectUsers(newSelectedIds);
+      return newSelectedIds;
+    });
+  };
+
+  const handleDeleteClick = (user: UserData) => {
+    setSelectedUser(user);
+    setIsModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedUser) return;
+
+    try {
+      await axios.patch(
+        `https://109.230.200.230:7890/api/v1/Admins/${selectedUser.id}/Ban`,
+        {},
+        { withCredentials: true }
+      );
+      setInfo((prevInfo) => prevInfo.filter((item) => item.id !== selectedUser.id));
+      setIsModalOpen(false);
+      setSelectedUser(null);
+    } catch (error: any) {
+      setError(`خطا در بن کردن کاربر: ${error.message}`);
+      setIsModalOpen(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedUser(null);
+  };
+
+  const totalPages = Math.ceil(totalUsers / pageSize);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   return (
     <div>
@@ -84,22 +191,28 @@ export default function Table() {
               >
                 <th>
                   <label>
-                    <input type="checkbox" className="checkbox" />
+                    <input
+                      type="checkbox"
+                      className="checkbox"
+                      checked={selectedIds.includes(item.id)}
+                      onChange={() => handleCheckboxChange(item.id)}
+                    />
                   </label>
                 </th>
                 <td>{item.row}</td>
                 <td>{item.date}</td>
                 <td className="flex items-center gap-2">
-                  <img src={item.image} alt="profile" className="w-6 h-6" />
+                  <img src={item.image} alt="profile" className="w-6 h-6 object-cover rounded-full" />
                   <span>{item.name}</span>
                 </td>
                 <td>{item.email}</td>
                 <td>{item.card}</td>
                 <td>{item.number}</td>
                 <td className="flex items-center gap-3 text-[#ADADAD]">
-                  <LuUserRoundX className="w-[22px] h-[22px]" />
+                  <button onClick={() => handleDeleteClick(item)}>
+                    <LuUserRoundX className="w-[22px] h-[22px] hover:text-red-500" />
+                  </button>
                   <SlEye className="w-[22px] h-[22px]" />
-                  <CiMoneyBill className="w-6 h-6" />
                 </td>
               </tr>
             ))}
@@ -109,27 +222,45 @@ export default function Table() {
       <div className="flex items-center mt-[35px] w-full">
         <div className="w-3/12">
           <span className="text-[#868686] font-xregular text-[12px]">
-            نمایش <span className="text-[#202020] font-xbold">8</span> از 68 نتیجه
+            نمایش <span className="text-[#202020] font-xbold">{info.length}</span> از {totalUsers} نتیجه
           </span>
         </div>
         <div className="join flex items-center justify-center w-full mr-[-190px] text-[14px] font-xregular gap-[9px]">
-          <button className="bg-[#EDEDED] p-[6px] rounded-[6.67px]">
+          <button
+            className="bg-[#EDEDED] p-[6px] rounded-[6.67px]"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
             <IoIosArrowForward className="w-4 h-4 text-[#606060]" />
           </button>
-          <button className="bg-[#F1F8FF] px-[10.8px] py-[2.8px] rounded-[6.67px]">
-            1
-          </button>
-          <button className="bg-[#F1F8FF] px-[10.8px] py-[2.8px] rounded-[6.67px]">
-            2
-          </button>
-          <button className="bg-[#F1F8FF] px-[10.8px] py-[2.8px] rounded-[6.67px]">
-            3
-          </button>
-          <button className="bg-[#EDEDED] p-[6px] rounded-[6.67px]">
+          {[...Array(totalPages)].map((_, index) => (
+            <button
+              key={index + 1}
+              className={`px-[10.8px] py-[2.8px] rounded-[6.67px] ${
+                currentPage === index + 1 ? "bg-[#253359] text-white" : "bg-[#F1F8FF]"
+              }`}
+              onClick={() => handlePageChange(index + 1)}
+            >
+              {index + 1}
+            </button>
+          ))}
+          <button
+            className="bg-[#EDEDED] p-[6px] rounded-[6.67px]"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
             <IoIosArrowBack className="w-4 h-4 text-[#606060]" />
           </button>
         </div>
       </div>
+
+      <DeleteModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onConfirm={handleConfirmDelete}
+        userName={selectedUser?.name || ""}
+        userId={selectedUser?.id || ""}
+      />
     </div>
   );
 }

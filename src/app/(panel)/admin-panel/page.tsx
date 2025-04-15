@@ -97,7 +97,7 @@ export default function page() {
   ];
 
   return (
-    <>
+    <div className="mx-auto max-w-[1440px] lg:px-20 lg:bg-[#F4F5FC] lg:h-full">
       <div className="px-5 lg:px-0 pt-6 lg:pt-0 lg:flex h-full lg:items-start lg:bg-[#F4F5FC]">
         <div className="flex items-center justify-between lg:hidden">
           <RxHamburgerMenu
@@ -197,6 +197,6 @@ export default function page() {
           ))}
         </div>
       </div>
-    </>
+    </div>
   );
 }

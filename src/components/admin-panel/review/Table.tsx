@@ -97,7 +97,7 @@ export default function Table() {
                   <div className="flex items-start gap-[8px] mt-4">
                     <button
                       onClick={() =>
-                        document.getElementById("my_modal_3").showModal()
+                        document.getElementById("my_modal_12").showModal()
                       }
                     >
                       <BsReply className="w-4 h-4 text-[#253359]" />
@@ -111,7 +111,7 @@ export default function Table() {
         </table>
       </div>
 
-      <dialog id="my_modal_3" className="modal w-full ">
+      <dialog id="my_modal_12" className="modal w-full ">
         <div className="modal-box w-full max-w-[450px] mx-auto">
           <form method="dialog">
             <button className="btn btn-sm btn-circle btn-ghost absolute left-3 top-4">
