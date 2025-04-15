@@ -10,16 +10,36 @@ import axios from "axios";
 
 export default function Users() {
   const [file, setFile] = useState<File | null>(null);
-  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]); // ذخیره id کاربران انتخاب‌شده
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const search = useForm<dataType>({});
-  const { handleSubmit, register, formState: { errors } } = search;
+  // فرم جستجو
+  const searchForm = useForm<SearchFormData>({ defaultValues: { search: "", userType: "0" } });
+  const { handleSubmit: handleSearchSubmit, register: registerSearch, watch, formState: { errors: searchErrors } } = searchForm;
 
-  interface dataType {
-    discription: string;
+  // فرم ارسال نوتیفیکیشن
+  const notificationForm = useForm<NotificationFormData>({});
+  const { handleSubmit: handleNotificationSubmit, register: registerNotification, formState: { errors: notificationErrors } } = notificationForm;
+
+  // فرم شارژ کیف پول
+  const walletForm = useForm<WalletFormData>({});
+  const { handleSubmit: handleWalletSubmit, register: registerWallet, formState: { errors: walletErrors } } = walletForm;
+
+  // Interface برای فرم جستجو
+  interface SearchFormData {
     search: string;
-    select: string;
+    userType: string; // تغییر نام از "select" به "userType" برای وضوح بیشتر
+  }
+
+  // Interface برای فرم ارسال نوتیفیکیشن
+  interface NotificationFormData {
+    title: string;
+    description: string;
+  }
+
+  // Interface برای فرم شارژ کیف پول
+  interface WalletFormData {
+    amount: string;
   }
 
   const check = [
@@ -28,12 +48,12 @@ export default function Users() {
     { id: 3, text: " ایمیل " },
   ];
 
-  const onSubmit = (data: dataType) => {
-    console.log(data);
+  const onSearchSubmit = (data: SearchFormData) => {
+    console.log("Search form data:", data);
   };
 
   const onErrorHandler = (error: FieldErrors) => {
-    console.log(error);
+    console.log("Form errors:", error);
   };
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -51,19 +71,18 @@ export default function Users() {
     },
   });
 
-  // تابع دریافت id کاربران انتخاب‌شده از Table
   const handleSelectUsers = (ids: string[]) => {
     setSelectedUserIds(ids);
   };
 
-  // تابع ارسال درخواست افزایش موجودی کیف پول
-  const handleIncreaseWallet = async (data: { discription: string }) => {
+  const handleIncreaseWallet = async (data: WalletFormData) => {
+    console.log("handleIncreaseWallet called with data:", data);
     if (selectedUserIds.length === 0) {
       setError("لطفاً حداقل یک کاربر انتخاب کنید.");
       return;
     }
 
-    const amount = parseInt(data.discription);
+    const amount = parseInt(data.amount);
     if (isNaN(amount) || amount <= 0) {
       setError("مبلغ واردشده معتبر نیست.");
       return;
@@ -79,10 +98,42 @@ export default function Users() {
       }
       setError(null);
       alert("موجودی کیف پول با موفقیت افزایش یافت.");
+      document.getElementById("my_modal_6")?.close();
     } catch (err: any) {
       setError(`خطا در افزایش موجودی: ${err.message}`);
     }
   };
+
+  const handleSendNotification = async (data: NotificationFormData) => {
+    console.log("handleSendNotification called with data:", data);
+    if (selectedUserIds.length === 0) {
+      setError("لطفاً حداقل یک کاربر انتخاب کنید.");
+      return;
+    }
+
+    const notificationData = {
+      users: selectedUserIds,
+      title: data.title || "اعلان جدید",
+      text: data.description,
+      imageUrl: "",
+    };
+
+    try {
+      await axios.post(
+        "https://109.230.200.230:7890/api/v1/Admins/Notifications",
+        notificationData,
+        { withCredentials: true }
+      );
+      setError(null);
+      alert("نوتیفیکیشن با موفقیت ارسال شد.");
+      document.getElementById("my_modal_5")?.close();
+    } catch (err: any) {
+      setError(`خطا در ارسال نوتیفیکیشن: ${err.message}`);
+    }
+  };
+
+  // مقدار userType را از فرم جستجو می‌گیریم
+  const userTypeFilter = Number(watch("userType"));
 
   return (
     <div className="px-5 max-w-[500px] mx-auto md:max-w-[900px] lg:max-w-[1440px] lg:mr-[260px] lg:px-6 lg:bg-white h-screen rounded-lg">
@@ -127,16 +178,18 @@ export default function Users() {
         <div className="flex items-center w-full justify-between">
           <input type="checkbox" defaultChecked className="checkbox md:hidden" />
           <div className="flex items-center gap-4">
-            <form noValidate onSubmit={handleSubmit(onSubmit)}>
+            <form noValidate onSubmit={handleSearchSubmit(onSearchSubmit)}>
               <div className="flex items-center w-full">
                 <label className="border border-[#ADADAD] rounded-[8px] md:w-[160px] py-[11px] md:py-2 flex items-center justify-between gap-2">
                   <select
-                    id="select"
-                    {...register("select")}
+                    id="userType"
+                    {...registerSearch("userType")} // تغییر نام از "select" به "userType"
                     className="text-[14px] font-xregular text-[#606060]"
                   >
-                    <option value="option1"> نوع کاربر </option>
-                    <option value="option2"> همه </option>
+                    <option value="0">جدیدترین</option>
+                    <option value="1">کاربران بن‌شده</option>
+                    <option value="2">دانشجویان مکین</option>
+                    <option value="3">کوورک اجباری</option>
                   </select>
                 </label>
               </div>
@@ -157,21 +210,37 @@ export default function Users() {
                   </button>
                 </form>
                 <div className="flex flex-col w-full text-[#202020] text-[14px] font-xbold gap-4">
-                  <form noValidate onSubmit={handleSubmit(onSubmit, onErrorHandler)}>
+                  {error && <p className="text-red-500">{error}</p>}
+                  <form noValidate onSubmit={handleNotificationSubmit(handleSendNotification, onErrorHandler)}>
                     <div className="flex flex-col gap-[6px] w-full">
-                      <label className="text-[14px] font-xbold text-[#404040]" htmlFor="discription">
+                      <label className="text-[14px] font-xbold text-[#404040]" htmlFor="title">
+                        عنوان پیام
+                      </label>
+                      <input
+                        className="placeholder-[#868686] font-xregular text-[14px] py-[12.5px] px-3 rounded-lg border border-[#CBCBCB]"
+                        placeholder="عنوان پیام را وارد کنید"
+                        type="text"
+                        id="title"
+                        {...registerNotification("title", {
+                          required: "پر کردن فیلد عنوان اجباری است",
+                        })}
+                      />
+                      <p className="error">{notificationErrors.title?.message}</p>
+                    </div>
+                    <div className="flex flex-col gap-[6px] w-full">
+                      <label className="text-[14px] font-xbold text-[#404040]" htmlFor="description">
                         متن پیام
                       </label>
                       <input
                         className="placeholder-[#868686] font-xregular text-[14px] md:pb-[121px] md:pt-[10px] px-3 rounded-lg border border-[#CBCBCB]"
                         placeholder="متن پیام را اینجا بنویسید"
                         type="text"
-                        id="discription"
-                        {...register("discription", {
+                        id="description"
+                        {...registerNotification("description", {
                           required: "پر کردن فیلد پیام اجباری است",
                         })}
                       />
-                      <p className="error">{errors.discription?.message}</p>
+                      <p className="error">{notificationErrors.description?.message}</p>
                     </div>
                     <div className="form-control flex flex-row items-center gap-6">
                       {check.map((item) => (
@@ -209,21 +278,21 @@ export default function Users() {
                     <img src="/admin-panel/money-add.svg" alt="img" />
                   </div>
                   {error && <p className="text-red-500">{error}</p>}
-                  <form noValidate onSubmit={handleSubmit(handleIncreaseWallet, onErrorHandler)}>
+                  <form noValidate onSubmit={handleWalletSubmit(handleIncreaseWallet, onErrorHandler)}>
                     <div className="flex flex-col gap-[8px] w-full">
-                      <label className="text-[14px] font-xbold text-[#404040]" htmlFor="discription">
+                      <label className="text-[14px] font-xbold text-[#404040]" htmlFor="amount">
                         مبلغ شارژ
                       </label>
                       <input
                         className="placeholder-[#868686] font-xregular text-[14px] py-[12.5px] px-3 rounded-lg border border-[#CBCBCB]"
                         placeholder="مبلغ شارژ را وارد نمایید"
                         type="text"
-                        id="discription"
-                        {...register("discription", {
+                        id="amount"
+                        {...registerWallet("amount", {
                           required: "پر کردن فیلد مبلغ اجباری است",
                         })}
                       />
-                      <p className="error">{errors.discription?.message}</p>
+                      <p className="error">{walletErrors.amount?.message}</p>
                     </div>
                     <div className="flex items-center justify-start w-full gap-4 mt-3">
                       <div className="flex items-center gap-2">
@@ -257,7 +326,7 @@ export default function Users() {
           <form
             className="flex items-center w-full justify-end gap-2"
             noValidate
-            onSubmit={handleSubmit(onSubmit)}
+            onSubmit={handleSearchSubmit(onSearchSubmit)}
           >
             <div className="flex flex-col pt-3 md:pt-0">
               <input
@@ -265,7 +334,7 @@ export default function Users() {
                 placeholder="جستجو"
                 type="search"
                 id="search"
-                {...register("search")}
+                {...registerSearch("search")}
               />
             </div>
           </form>
@@ -273,7 +342,7 @@ export default function Users() {
       </div>
 
       <div className="mt-6 md:block">
-        <Table onSelectUsers={handleSelectUsers} />
+        <Table onSelectUsers={handleSelectUsers} userTypeFilter={userTypeFilter} />
       </div>
     </div>
   );

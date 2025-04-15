@@ -30,20 +30,24 @@ interface ApiResponse {
 
 interface TableProps {
   onSelectUsers: (selectedIds: string[]) => void;
+  userTypeFilter: number; // نوع کاربر (0: Newest, 1: Banned, 2: MakeenStudent, 3: ForcedCoWorks)
 }
 
-export default function Table({ onSelectUsers }: TableProps) {
+export default function Table({ onSelectUsers, userTypeFilter }: TableProps) {
   const [info, setInfo] = useState<UserData[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize] = useState<number>(10); // تعداد کاربران در هر صفحه
+  const [totalUsers, setTotalUsers] = useState<number>(0); // تعداد کل کاربران
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get<ApiResponse[]>(
-          "https://109.230.200.230:7890/api/v1/Admins/Users?page=1&pageSize=10&orderBy=CreationTime&sortOrder=DESC",
+          `https://109.230.200.230:7890/api/v1/Admins/Users?page=${currentPage}&pageSize=${pageSize}&userType=${userTypeFilter}&orderBy=CreationTime&sortOrder=DESC`,
           { withCredentials: true }
         );
 
@@ -61,10 +65,8 @@ export default function Table({ onSelectUsers }: TableProps) {
                   }
                 );
 
-                // لاگ کردن خروجی API
                 console.log(`پاسخ API عکس برای کاربر ${item.id}:`, imageResponse.data);
 
-                // تبدیل Blob به Base64 برای لاگ کردن محتوای دقیق (اختیاری)
                 const reader = new FileReader();
                 reader.readAsDataURL(imageResponse.data);
                 reader.onloadend = () => {
@@ -79,7 +81,7 @@ export default function Table({ onSelectUsers }: TableProps) {
 
             return {
               id: item.id,
-              row: (index + 1).toString(),
+              row: ((currentPage - 1) * pageSize + index + 1).toString(), // محاسبه شماره ردیف با توجه به صفحه
               email: item.email || "نامشخص",
               name: `${item.firstName} ${item.lastName}`,
               date: new Date(item.creationTime).toLocaleDateString("fa-IR"),
@@ -92,6 +94,9 @@ export default function Table({ onSelectUsers }: TableProps) {
 
         setInfo(formattedData);
         setError(null);
+        // فرض می‌کنیم API تعداد کل کاربران را در هدر یا بدنه پاسخ برمی‌گرداند
+        // اگر API تعداد کل را برمی‌گرداند، باید آن را اینجا تنظیم کنیم
+        setTotalUsers(68); // این مقدار باید از API گرفته شود (برای مثال از هدر یا بدنه پاسخ)
       } catch (error: any) {
         setError(`خطا در بارگذاری داده‌ها: ${error.message}`);
       }
@@ -106,7 +111,7 @@ export default function Table({ onSelectUsers }: TableProps) {
         }
       });
     };
-  }, []);
+  }, [currentPage, userTypeFilter]); // هر بار که صفحه یا نوع کاربر تغییر کند، داده‌ها دوباره بارگذاری می‌شوند
 
   const handleCheckboxChange = (id: string) => {
     setSelectedIds((prev) => {
@@ -144,6 +149,14 @@ export default function Table({ onSelectUsers }: TableProps) {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedUser(null);
+  };
+
+  const totalPages = Math.ceil(totalUsers / pageSize);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
   };
 
   return (
@@ -208,23 +221,33 @@ export default function Table({ onSelectUsers }: TableProps) {
       <div className="flex items-center mt-[35px] w-full">
         <div className="w-3/12">
           <span className="text-[#868686] font-xregular text-[12px]">
-            نمایش <span className="text-[#202020] font-xbold">{info.length}</span> از 68 نتیجه
+            نمایش <span className="text-[#202020] font-xbold">{info.length}</span> از {totalUsers} نتیجه
           </span>
         </div>
         <div className="join flex items-center justify-center w-full mr-[-190px] text-[14px] font-xregular gap-[9px]">
-          <button className="bg-[#EDEDED] p-[6px] rounded-[6.67px]">
+          <button
+            className="bg-[#EDEDED] p-[6px] rounded-[6.67px]"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
             <IoIosArrowForward className="w-4 h-4 text-[#606060]" />
           </button>
-          <button className="bg-[#F1F8FF] px-[10.8px] py-[2.8px] rounded-[6.67px]">
-            1
-          </button>
-          <button className="bg-[#F1F8FF] px-[10.8px] py-[2.8px] rounded-[6.67px]">
-            2
-          </button>
-          <button className="bg-[#F1F8FF] px-[10.8px] py-[2.8px] rounded-[6.67px]">
-            3
-          </button>
-          <button className="bg-[#EDEDED] p-[6px] rounded-[6.67px]">
+          {[...Array(totalPages)].map((_, index) => (
+            <button
+              key={index + 1}
+              className={`px-[10.8px] py-[2.8px] rounded-[6.67px] ${
+                currentPage === index + 1 ? "bg-[#253359] text-white" : "bg-[#F1F8FF]"
+              }`}
+              onClick={() => handlePageChange(index + 1)}
+            >
+              {index + 1}
+            </button>
+          ))}
+          <button
+            className="bg-[#EDEDED] p-[6px] rounded-[6.67px]"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
             <IoIosArrowBack className="w-4 h-4 text-[#606060]" />
           </button>
         </div>
