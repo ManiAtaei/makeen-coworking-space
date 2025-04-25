@@ -39,7 +39,11 @@ const SupportTicket: React.FC<TicketProps> = ({
   onClose,
 }) => {
   const form = useForm<{ message: string }>();
+
+  // const [attachment, setAttachment] = useState<string | null>(null);
+
   const [file, setFile] = useState<File | null>(null);
+
   const { register, handleSubmit, reset } = form;
   const messagesEndRef = useRef<HTMLDivElement>(null);
 

@@ -6,6 +6,7 @@ import { IoCheckmarkCircleOutline } from "react-icons/io5";
 import { MdEdit } from "react-icons/md";
 import { GoKey } from "react-icons/go";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import Image from "next/image";
 
 interface DataType {
   firstName: string;
@@ -29,9 +30,15 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const form = useForm<DataType>({
+  const {
+    handleSubmit,
+    formState: { errors },
+    register,
+    setValue,
+  } = useForm<DataType>({
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -44,14 +51,11 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
   });
 
   const {
-    handleSubmit,
-    formState: { errors },
-    register,
-    setValue,
-    reset,
-  } = form;
-
-  const passwordForm = useForm<{
+    handleSubmit: handlePasswordSubmit,
+    register: registerPassword,
+    formState: { errors: passwordErrors },
+    reset: resetPasswordForm,
+  } = useForm<{
     password: string;
     newPassword: string;
   }>({
@@ -61,22 +65,21 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
     },
   });
 
-  const {
-    handleSubmit: handlePasswordSubmit,
-    register: registerPassword,
-    formState: { errors: passwordErrors },
-    reset: resetPasswordForm,
-  } = passwordForm;
-
   useEffect(() => {
     if (userData) {
       setValue("firstName", userData.firstName);
       setValue("lastName", userData.lastName);
-      setValue("birthDate", userData.birthDate.split("T")[0]);
+      setValue("birthDate", userData.birthDate ? userData.birthDate.split("T")[0] : "");
       setValue("email", userData.email);
-      userData.nationalCode && setValue("nationalCode", userData.nationalCode);
-      userData.phoneNumber && setValue("phoneNumber", userData.phoneNumber);
-      userData.gender !== undefined && setValue("gender", userData.gender);
+      if (userData.nationalCode) {
+        setValue("nationalCode", userData.nationalCode);
+      }
+      if (userData.phoneNumber) {
+        setValue("phoneNumber", userData.phoneNumber);
+      }
+      if (userData.gender !== undefined) {
+        setValue("gender", userData.gender);
+      }
     }
     if (profilePhoto) {
       setProfileImage(profilePhoto);
@@ -136,19 +139,24 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
 
   const onSubmit = async (data: DataType) => {
     try {
+      setIsSubmitting(true);
       const updatedData: Partial<DataType> = {};
       
-      // Only include fields that were edited
+      // Type-safe way to update fields
       editableFields.forEach(field => {
-        updatedData[field as keyof DataType] = data[field as keyof DataType];
+        const key = field as keyof DataType;
+        if (key in data) {
+          updatedData[key] = data[key];
+        }
       });
 
-      const profileData = {
-        ...(updatedData.firstName && { firstName: updatedData.firstName }),
-        ...(updatedData.lastName && { lastName: updatedData.lastName }),
-        ...(updatedData.birthDate && { birthDate: new Date(updatedData.birthDate).toISOString() }),
-        ...(updatedData.email && { email: updatedData.email }),
-      };
+      // Create profile data with proper typing
+      const profileData: Record<string, string> = {};
+      
+      if (updatedData.firstName) profileData.firstName = updatedData.firstName;
+      if (updatedData.lastName) profileData.lastName = updatedData.lastName;
+      if (updatedData.birthDate) profileData.birthDate = new Date(updatedData.birthDate).toISOString();
+      if (updatedData.email) profileData.email = updatedData.email;
 
       const response = await fetch("https://109.230.200.230:7890/api/v1/Users/Profile", {
         method: "PUT",
@@ -160,7 +168,8 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
       });
 
       if (!response.ok) {
-        throw new Error("خطا در به‌روزرسانی پروفایل");
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || "خطا در به‌روزرسانی پروفایل");
       }
 
       alert("مشخصات با موفقیت به‌روزرسانی شد");
@@ -168,7 +177,9 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
       setEditableFields([]);
     } catch (error) {
       console.log("Error updating profile:", error);
-      alert("خطا در به‌روزرسانی پروفایل");
+      alert(error instanceof Error ? error.message : "خطا در به‌روزرسانی پروفایل");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -204,7 +215,6 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
 
   const toggleEdit = () => {
     if (!isEditing) {
-      // When entering edit mode, identify which fields are editable
       const editableFieldNames = formMap
         .filter(item => item.editable)
         .map(item => item.field);
@@ -212,7 +222,6 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
       setEditableFields(editableFieldNames);
       setIsEditing(true);
     } else {
-      // When canceling edit mode, reset the form to original values
       if (userData) {
         setValue("firstName", userData.firstName);
         setValue("lastName", userData.lastName);
@@ -226,6 +235,7 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
 
   const uploadFile = async (selectedFile: File) => {
     try {
+      setIsSubmitting(true);
       const formData = new FormData();
       formData.append("file", selectedFile);
 
@@ -243,6 +253,11 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
         method: "GET",
         credentials: "include",
       });
+      
+      if (!photoResponse.ok) {
+        throw new Error("Failed to retrieve updated profile photo");
+      }
+      
       const photoBlob = await photoResponse.blob();
       const updatedPhotoUrl = URL.createObjectURL(photoBlob);
       setProfileImage(updatedPhotoUrl);
@@ -250,12 +265,15 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
       console.log("Profile photo uploaded successfully");
     } catch (error) {
       console.log("Error uploading profile photo:", error);
-      alert("خطا در آپلود عکس پروفایل");
+      alert(error instanceof Error ? error.message : "خطا در آپلود عکس پروفایل");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleChangePassword = async (data: { password: string; newPassword: string }) => {
     try {
+      setIsSubmitting(true);
       const response = await fetch("https://109.230.200.230:7890/api/v1/Users/Change-Password", {
         method: "PATCH",
         headers: {
@@ -268,20 +286,23 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
         credentials: "include",
       });
 
+      const responseData = await response.json().catch(() => ({}));
+
       if (!response.ok) {
-        const errorData = await response.json();
-        const errorMessage = errorData.errors
-          ? Object.values(errorData.errors).flat().join("\n")
-          : "خطا در تغییر رمز عبور";
+        const errorMessage = responseData.errors
+          ? Object.values(responseData.errors).flat().join("\n")
+          : responseData.message || "خطا در تغییر رمز عبور";
         throw new Error(errorMessage);
       }
 
       alert("رمز عبور با موفقیت تغییر یافت");
       setIsModalOpen(false);
       resetPasswordForm();
-    } catch (error: any) {
+    } catch (error) {
       console.log("Error changing password:", error);
-      alert(error.message || "خطا در تغییر رمز عبور");
+      alert(error instanceof Error ? error.message : "خطا در تغییر رمز عبور");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -301,11 +322,23 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
 
       <div className="flex justify-center mt-[17px] relative">
         <div className="relative cursor-pointer" onClick={handleImageClick}>
-          <img
-            src={profileImage || ""}
-            alt="تصویر پروفایل"
-            className="w-28 h-28 rounded-full object-cover border-[6px] border-[#4073D0]"
-          />
+          {profileImage ? (
+            <Image
+              src={profileImage}
+              alt="تصویر پروفایل"
+              width={112}
+              height={112}
+              className="rounded-full object-cover border-[6px] border-[#4073D0]"
+            />
+          ) : (
+            <Image
+              src="/placeholder.png"
+              alt="تصویر پروفایل"
+              width={112}
+              height={112}
+              className="rounded-full object-cover border-[6px] border-[#4073D0]"
+            />
+          )}
           {isEditing && (
             <div className="absolute bottom-1 w-9 h-9 right-1 bg-[#FF9568] rounded-full p-2">
               <MdEdit className="text-white w-5 h-5" onClick={handleImageClick} />
@@ -327,8 +360,9 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
             type={isEditing ? "submit" : "button"}
             onClick={!isEditing ? toggleEdit : undefined}
             className="bg-[#253359] text-[14px] font-xmedium text-white w-full py-2 rounded-lg md:hidden"
+            disabled={isSubmitting}
           >
-            {isEditing ? "تأیید" : "ویرایش مشخصات"}
+            {isSubmitting ? "در حال پردازش..." : isEditing ? "تأیید" : "ویرایش مشخصات"}
           </button>
 
           <div className="md:grid md:grid-cols-2 md:gap-8">
@@ -344,7 +378,7 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
                   placeholder={item.placeholder}
                   type={item.field === "birthDate" ? "date" : "text"}
                   id={item.field}
-                  disabled={!isEditing || !item.editable}
+                  disabled={!isEditing || !item.editable || isSubmitting}
                   {...register(item.field as keyof DataType, {
                     required: item.error,
                   })}
@@ -361,7 +395,10 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
               <div className="flex items-center gap-1">
                 <span className="text-[#202020] text-[14px] font-xbold">آپلود مدارک:</span>
                 <IoCheckmarkCircleOutline className="text-[#00BA88] bg-transparent w-5 h-5 rounded-full" />
-                <button type="button" className="text-[12px] font-xregular underline underline-offset-4">
+                <button 
+                  type="button" 
+                  className="text-[12px] font-xregular underline underline-offset-4"
+                >
                   مشاهده
                 </button>
               </div>
@@ -373,7 +410,7 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
                     <input
                       type="radio"
                       value="false"
-                      disabled={!isEditing}
+                      disabled={!isEditing || isSubmitting}
                       {...register("gender", {
                         setValueAs: (value) => value === "false" ? false : true,
                       })}
@@ -385,7 +422,7 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
                     <input
                       type="radio"
                       value="true"
-                      disabled={!isEditing}
+                      disabled={!isEditing || isSubmitting}
                       {...register("gender", {
                         setValueAs: (value) => value === "false" ? false : true,
                       })}
@@ -401,7 +438,8 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
               <button
                 type="button"
                 onClick={isEditing ? toggleEdit : () => setIsModalOpen(true)}
-                className="bg-white border border-[#253359] text-[16px] font-xmedium text-[#253359] w-full max-w-[188px] rounded-lg flex items-center justify-center gap-2"
+                className="bg-white border border-[#253359] text-[16px] font-xmedium text-[#253359] w-full max-w-[188px] rounded-lg flex items-center justify-center gap-2 py-[12px]"
+                disabled={isSubmitting}
               >
                 {isEditing ? "کنسل" : <><GoKey /> تغییر رمز ورود</>}
               </button>
@@ -409,8 +447,9 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
                 type={isEditing ? "submit" : "button"}
                 onClick={!isEditing ? toggleEdit : undefined}
                 className="bg-[#253359] text-[16px] font-xmedium text-white py-[12px] w-full max-w-[188px] rounded-lg hidden md:block"
+                disabled={isSubmitting}
               >
-                {isEditing ? "تأیید" : "ویرایش مشخصات"}
+                {isSubmitting ? "در حال پردازش..." : isEditing ? "تأیید" : "ویرایش مشخصات"}
               </button>
             </div>
           </div>
@@ -422,7 +461,12 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
           <div className="bg-white p-6 rounded-lg w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-xbold">تغییر رمز عبور</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-500">
+              <button 
+                type="button"
+                onClick={() => setIsModalOpen(false)} 
+                className="text-gray-500"
+                disabled={isSubmitting}
+              >
                 ✕
               </button>
             </div>
@@ -436,6 +480,7 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
                   })}
                   placeholder="رمز عبور فعلی را وارد نمایید"
                   className="w-full p-2 mt-1 border border-gray-300 rounded-lg pr-10"
+                  disabled={isSubmitting}
                 />
                 {passwordErrors.password && (
                   <p className="text-red-500 text-xs mt-1">{passwordErrors.password.message}</p>
@@ -445,6 +490,7 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-10 text-gray-500"
                   aria-label={showPassword ? "مخفی کردن رمز عبور" : "نمایش رمز عبور"}
+                  disabled={isSubmitting}
                 >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
@@ -455,9 +501,14 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
                   type={showNewPassword ? "text" : "password"}
                   {...registerPassword("newPassword", {
                     required: "رمز عبور جدید اجباری است",
+                    minLength: {
+                      value: 8,
+                      message: "رمز عبور باید حداقل 8 کاراکتر باشد"
+                    }
                   })}
                   placeholder="رمز عبور جدید را وارد نمایید"
                   className="w-full p-2 mt-1 border border-gray-300 rounded-lg pr-10"
+                  disabled={isSubmitting}
                 />
                 {passwordErrors.newPassword && (
                   <p className="text-red-500 text-xs mt-1">{passwordErrors.newPassword.message}</p>
@@ -467,12 +518,17 @@ export default function UserProfile({ userData, profilePhoto }: UserProfileProps
                   onClick={() => setShowNewPassword(!showNewPassword)}
                   className="absolute right-3 top-10 text-gray-500"
                   aria-label={showNewPassword ? "مخفی کردن رمز عبور" : "نمایش رمز عبور"}
+                  disabled={isSubmitting}
                 >
                   {showNewPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
-              <button type="submit" className="bg-[#253359] text-white py-2 rounded-lg mt-4">
-                ثبت رمز عبور
+              <button 
+                type="submit" 
+                className="bg-[#253359] text-white py-2 rounded-lg mt-4"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "در حال پردازش..." : "ثبت رمز عبور"}
               </button>
             </form>
           </div>

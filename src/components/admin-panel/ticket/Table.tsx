@@ -5,16 +5,40 @@ import {
   IoCheckmarkCircleOutline,
 } from "react-icons/io5";
 import { SlEye } from "react-icons/sl";
-import { IoIosArrowForward } from "react-icons/io";
-import { IoIosArrowBack } from "react-icons/io";
+import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
 import SupportTicket from "./SupportTicket";
 import axios from "axios";
 
-export default function Table({ ticketType }) {
-  const [tickets, setTickets] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedTicket, setSelectedTicket] = useState(null);
+// Define types for tickets and messages
+interface Message {
+  id: string;
+  text: string;
+  time: string;
+  sender: "support" | "user";
+  attachment?: string;
+}
+
+interface Ticket {
+  id: string;
+  row: string;
+  method: string;
+  image: string;
+  name: string;
+  date: string;
+  status: "pending" | "answered" | "closed" | "open";
+  ticketId: string;
+  messages: Message[];
+}
+
+interface TableProps {
+  ticketType?: string;
+}
+
+export default function Table({ ticketType }: TableProps) {
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
   useEffect(() => {
     fetchTickets();
@@ -37,29 +61,29 @@ export default function Table({ ticketType }) {
         }
       );
 
-      // تبدیل داده‌های API به فرمت مورد نیاز کامپوننت
-      const formattedTickets = response.data.map((ticket, index) => ({
-        id: ticket.id,
-        row: (index + 1).toString(),
-        method: ticket.title,
-        image: ticket.image,
-        name: `${ticket.firstName} ${ticket.lastName}`,
-        date: new Date(ticket.creationTime).toLocaleDateString("fa-IR"),
-        status: mapStatus(ticket.ticketStatus), // تبدیل وضعیت API به وضعیت کامپوننت
-        ticketId: ticket.id,
-        messages: [], // در ابتدا خالی است و هنگام باز کردن تیکت پر می‌شود
-      }));
+      const formattedTickets: Ticket[] = response.data.map(
+        (ticket: any, index: number) => ({
+          id: ticket.id,
+          row: (index + 1).toString(),
+          method: ticket.title,
+          image: ticket.image,
+          name: `${ticket.firstName} ${ticket.lastName}`,
+          date: new Date(ticket.creationTime).toLocaleDateString("fa-IR"),
+          status: mapStatus(ticket.ticketStatus),
+          ticketId: ticket.id,
+          messages: [],
+        })
+      );
 
       setTickets(formattedTickets);
     } catch (error) {
-      console.error("خطا در دریافت تیکت‌ها:", error);
+      console.error("Error fetching tickets:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // تابع تبدیل وضعیت تیکت
-  const mapStatus = (status) => {
+  const mapStatus = (status: string): Ticket["status"] => {
     switch (status) {
       case "Pending":
         return "pending";
@@ -74,7 +98,7 @@ export default function Table({ ticketType }) {
     }
   };
 
-  const handleOpenModal = async (ticket) => {
+  const handleOpenModal = async (ticket: Ticket) => {
     try {
       // به جای بازیابی وضعیت فعلی تیکت از سرور، می‌توانیم یک پارامتر includeMessages اضافه کنیم
       const response = await axios.get(
@@ -84,8 +108,7 @@ export default function Table({ ticketType }) {
         }
       );
 
-      // تبدیل پیام‌های API به فرمت مورد نیاز کامپوننت
-      const formattedMessages = response.data.map((msg) => ({
+      const formattedMessages: Message[] = response.data.map((msg: any) => ({
         id: msg.id,
         text: msg.text,
         time: new Date(msg.creationTime).toLocaleTimeString([], {
@@ -103,7 +126,7 @@ export default function Table({ ticketType }) {
       });
       setIsModalOpen(true);
     } catch (error) {
-      console.error("خطا در دریافت پیام‌های تیکت:", error);
+      console.error("Error fetching ticket messages:", error);
     }
   };
 
@@ -146,7 +169,11 @@ export default function Table({ ticketType }) {
             messages: [
               ...prev.messages,
               {
+
+                id: `${Date.now()}`,
+
                 id: `temp-${Date.now()}`, // ایجاد یک ID موقت
+
                 text,
                 time: new Date().toLocaleTimeString([], {
                   hour: "2-digit",
@@ -158,6 +185,11 @@ export default function Table({ ticketType }) {
           }
         : null
     );
+
+
+  const handleCloseTicket = (ticketId: string) => {
+    console.log(`Closing ticket ${ticketId}`);
+    // Add API call or state update logic here
 
     // اگر فرستنده ادمین است، پیام را به سرور ارسال می‌کنیم
     if (sender === "support") {

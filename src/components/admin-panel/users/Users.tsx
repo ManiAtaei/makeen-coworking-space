@@ -6,24 +6,13 @@ import { BiMessageMinus } from "react-icons/bi";
 import { PiFileXls, PiMoneyWavyLight } from "react-icons/pi";
 import Table from "./Table";
 import { useDropzone } from "react-dropzone";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+import Image from "next/image";
 
 export default function Users() {
   const [file, setFile] = useState<File | null>(null);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-
-  // فرم جستجو
-  const searchForm = useForm<SearchFormData>({ defaultValues: { search: "", userType: "0" } });
-  const { handleSubmit: handleSearchSubmit, register: registerSearch, watch, formState: { errors: searchErrors } } = searchForm;
-
-  // فرم ارسال نوتیفیکیشن
-  const notificationForm = useForm<NotificationFormData>({});
-  const { handleSubmit: handleNotificationSubmit, register: registerNotification, formState: { errors: notificationErrors } } = notificationForm;
-
-  // فرم شارژ کیف پول
-  const walletForm = useForm<WalletFormData>({});
-  const { handleSubmit: handleWalletSubmit, register: registerWallet, formState: { errors: walletErrors } } = walletForm;
 
   // Interface برای فرم جستجو
   interface SearchFormData {
@@ -41,6 +30,18 @@ export default function Users() {
   interface WalletFormData {
     amount: string;
   }
+
+  // فرم جستجو
+  const searchForm = useForm<SearchFormData>({ defaultValues: { search: "", userType: "0" } });
+  const { handleSubmit: handleSearchSubmit, register: registerSearch, watch } = searchForm;
+
+  // فرم ارسال نوتیفیکیشن
+  const notificationForm = useForm<NotificationFormData>({});
+  const { handleSubmit: handleNotificationSubmit, register: registerNotification, formState: { errors: notificationErrors } } = notificationForm;
+
+  // فرم شارژ کیف پول
+  const walletForm = useForm<WalletFormData>({});
+  const { handleSubmit: handleWalletSubmit, register: registerWallet, formState: { errors: walletErrors } } = walletForm;
 
   const check = [
     { id: 1, text: " پیامک " },
@@ -99,8 +100,9 @@ export default function Users() {
       setError(null);
       alert("موجودی کیف پول با موفقیت افزایش یافت.");
       document.getElementById("my_modal_6")?.close();
-    } catch (err: any) {
-      setError(`خطا در افزایش موجودی: ${err.message}`);
+    } catch (err: unknown) {
+      const axiosError = err as AxiosError;
+      setError(`خطا در افزایش موجودی: ${axiosError.message}`);
     }
   };
 
@@ -127,8 +129,9 @@ export default function Users() {
       setError(null);
       alert("نوتیفیکیشن با موفقیت ارسال شد.");
       document.getElementById("my_modal_5")?.close();
-    } catch (err: any) {
-      setError(`خطا در ارسال نوتیفیکیشن: ${err.message}`);
+    } catch (err: unknown) {
+      const axiosError = err as AxiosError;
+      setError(`خطا در ارسال نوتیفیکیشن: ${axiosError.message}`);
     }
   };
 
@@ -197,7 +200,7 @@ export default function Users() {
 
             <button
               className="border border-[#253359] bg-[#F9F9F9] px-[10px] py-[10.44px] md:py-[7px] md:px-[34.97px] rounded-[8.36px] md:flex md:items-center md:text-[14px] md:font-xregular md:gap-2"
-              onClick={() => document.getElementById("my_modal_5").showModal()}
+              onClick={() => (document.getElementById("my_modal_5") as HTMLDialogElement)?.showModal()}
             >
               <BiMessageMinus className="text-[#404040] w-6 h-6" />
               <span className="hidden md:block text-[#404040]">ارسال پیام</span>
@@ -261,7 +264,7 @@ export default function Users() {
             </dialog>
 
             <button
-              onClick={() => document.getElementById("my_modal_6").showModal()}
+              onClick={() => (document.getElementById("my_modal_6") as HTMLDialogElement)?.showModal()}
               className="border border-[#253359] flex items-center gap-2 bg-[#F9F9F9] text-[#404040] px-[25.47px] py-[7px] text-[12px] font-xregular rounded-[8.36px]"
             >
               <PiMoneyWavyLight className="w-6 h-6" /> شارژ کیف پول
@@ -275,7 +278,12 @@ export default function Users() {
                 </form>
                 <div className="flex flex-col w-full text-[#202020] text-[14px] font-xbold gap-4">
                   <div className="flex justify-center">
-                    <img src="/admin-panel/money-add.svg" alt="img" />
+                    <Image 
+                      src="/admin-panel/money-add.svg" 
+                      alt="money icon" 
+                      width={80} 
+                      height={80} 
+                    />
                   </div>
                   {error && <p className="text-red-500">{error}</p>}
                   <form noValidate onSubmit={handleWalletSubmit(handleIncreaseWallet, onErrorHandler)}>

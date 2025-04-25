@@ -1,8 +1,13 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { LuUserRoundX } from "react-icons/lu";
 import { SlEye } from "react-icons/sl";
+
+
+import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
+import Image from "next/image";
+
 import DeleteModal from "./DeleteModal";
 import Pagination from "../Pagination";
 
@@ -91,7 +96,7 @@ export default function Table({ onSelectUsers, userTypeFilter }: TableProps) {
                 );
 
                 profileImage = URL.createObjectURL(imageResponse.data);
-              } catch (imgError: any) {
+              } catch (imgError: AxiosError | Error) {
                 console.error(`خطا در دریافت عکس پروفایل کاربر ${item.id}: ${imgError.message}`);
               }
             }
@@ -111,22 +116,35 @@ export default function Table({ onSelectUsers, userTypeFilter }: TableProps) {
 
         setInfo(formattedData);
         setError(null);
+        // فرض می‌کنیم API تعداد کل کاربران را در هدر یا بدنه پاسخ برمی‌گرداند
+        // اگر API تعداد کل را برمی‌گرداند، باید آن را اینجا تنظیم کنیم
+        setTotalUsers(68); // این مقدار باید از API گرفته شود (برای مثال از هدر یا بدنه پاسخ)
+      } catch (error: AxiosError | Error | unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'خطای ناشناخته';
+        setError(`خطا در بارگذاری داده‌ها: ${errorMessage}`);
+
       } catch (error: any) {
         setError(`خطا در بارگذاری داده‌ها: ${error.message}`);
+
       }
     };
 
     fetchData();
 
-    // cleanup برای آزادسازی URL‌های blob
+
+    // cleanup برای آزادساز
     return () => {
+      // Clean up blob URLs
       info.forEach((item) => {
         if (item.image.startsWith("blob:")) {
           URL.revokeObjectURL(item.image);
         }
       });
     };
+  }, [currentPage, userTypeFilter, pageSize]); // Added pageSize to dependency array
+
   }, [currentPage, userTypeFilter, pageSize]);
+
 
   const handleCheckboxChange = (id: string) => {
     setSelectedIds((prev) => {
@@ -157,8 +175,9 @@ export default function Table({ onSelectUsers, userTypeFilter }: TableProps) {
       setTotalUsers(prev => Math.max(0, prev - 1));
       setIsModalOpen(false);
       setSelectedUser(null);
-    } catch (error: any) {
-      setError(`خطا در بن کردن کاربر: ${error.message}`);
+    } catch (error: AxiosError | Error | unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'خطای ناشناخته';
+      setError(`خطا در بن کردن کاربر: ${errorMessage}`);
       setIsModalOpen(false);
     }
   };
@@ -214,7 +233,13 @@ export default function Table({ onSelectUsers, userTypeFilter }: TableProps) {
                 <td>{item.row}</td>
                 <td>{item.date}</td>
                 <td className="flex items-center gap-2">
-                  <img src={item.image} alt="profile" className="w-6 h-6 object-cover rounded-full" />
+                  <Image 
+                    src={item.image} 
+                    alt="profile" 
+                    width={24} 
+                    height={24} 
+                    className="object-cover rounded-full" 
+                  />
                   <span>{item.name}</span>
                 </td>
                 <td>{item.email}</td>

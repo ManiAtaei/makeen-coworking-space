@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { FaCaretLeft } from "react-icons/fa";
 import { AiOutlineMessage } from "react-icons/ai";
 import { LuUserRoundX } from "react-icons/lu";
