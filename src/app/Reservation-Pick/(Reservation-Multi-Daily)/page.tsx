@@ -2,16 +2,32 @@
 import React, { useState, useEffect } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 import { IoIosArrowBack } from "react-icons/io";
-import { IoClose } from "react-icons/io5"; // برای آیکون حذف
 import moment from "jalali-moment";
-import { set } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { useReservation } from "./ReservationContext";
 
 const MultiDiaily = () => {
-  const [activeStep, setActiveStep] = useState(0);
-  const [selectedDays, setSelectedDays] = useState([]);
+  const router = useRouter();
+
+  // استفاده از context
+  const {
+    seatType,
+    setSeatType,
+    selectedDays,
+    setSelectedDays,
+    discountText,
+    setDiscountText,
+    setDiscountApplied,
+    calculateTotalPrice,
+    calculateFinalPrice,
+    walletBalance,
+    totalPrice,
+    finalPrice,
+    goToNextStep,
+  } = useReservation();
+
   const [isCalendarSelected, setIsCalendarSelected] = useState(false);
-  const [seatType, setSeatType] = useState("");
-  const [disCount, setDisCount] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   // تنظیم تاریخ فعلی به صورت شمسی
   const [currentDate, setCurrentDate] = useState(() => {
@@ -21,6 +37,45 @@ const MultiDiaily = () => {
   const [currentMonth, setCurrentMonth] = useState(() => {
     return currentDate.format("jMMMM jYYYY");
   });
+
+  // ذخیره انتخاب‌ها برای هر ماه
+  const [monthlySelections, setMonthlySelections] = useState({});
+
+  // وضعیت باز بودن هر ماه در لیست رزروها
+  const [expandedMonths, setExpandedMonths] = useState({});
+
+  // اضافه کردن useEffect جدید برای مقداردهی اولیه state‌های داخلی بر اساس context
+  useEffect(() => {
+    // اگر از قبل مقداردهی نشده و context دارای داده است
+    if (!initialized && selectedDays.length > 0) {
+      // گروه‌بندی روزها براساس ماه
+      const groupedByMonth = {};
+
+      selectedDays.forEach((dayItem) => {
+        const { month, day } = dayItem;
+        if (!groupedByMonth[month]) {
+          groupedByMonth[month] = [];
+        }
+        groupedByMonth[month].push(Number(day));
+      });
+
+      // به‌روزرسانی monthlySelections
+      setMonthlySelections(groupedByMonth);
+
+      // به‌روزرسانی expandedMonths (باز کردن همه ماه‌ها)
+      const expandStates = {};
+      Object.keys(groupedByMonth).forEach((month) => {
+        expandStates[month] = true;
+      });
+      setExpandedMonths(expandStates);
+
+      // به‌روزرسانی وضعیت انتخاب تقویم
+      setIsCalendarSelected(true);
+      calculateTotalPrice();
+      // علامت‌گذاری که مقداردهی اولیه انجام شده
+      setInitialized(true);
+    }
+  }, [selectedDays, initialized]);
 
   // روزهای هفته
   const weekDays = [
@@ -35,28 +90,62 @@ const MultiDiaily = () => {
 
   // تخفیف ها
   const discount = [
-    { id: 1, day: "5", percentage: "10%" },
+    { id: 1, day: "5", percentage: "5%" },
     { id: 2, day: "10", percentage: "15%" },
-    { id: 3, day: "15", percentage: "20%" },
+    { id: 3, day: "15", percentage: "25%" },
   ];
 
-  const [discountText, setDiscountText] = useState("");
+  // محاسبه تعداد کل روزهای انتخاب شده در همه ماه‌ها
+  const getTotalSelectedDays = () => {
+    let total = 0;
+    Object.values(monthlySelections).forEach((days) => {
+      total += days.length;
+    });
+    return total;
+  };
 
+  // این useEffect را اصلاح کنید:
   useEffect(() => {
-    if (selectedDays.length < 5) {
-      setDisCount(false);
+    if (selectedDays.length > 0 && seatType) {
+      calculateTotalPrice();
+    }
+  }, [selectedDays, seatType]);
+
+  // اصلاح useEffect مربوط به به‌روزرسانی selectedDays
+  useEffect(() => {
+    const totalDays = getTotalSelectedDays();
+
+    // به‌روزرسانی وضعیت تخفیف
+    if (totalDays < 5) {
+      setDiscountApplied(false);
       setDiscountText("");
-    } else if (selectedDays.length >= 5 && selectedDays.length < 10) {
-      setDisCount(true);
+    } else if (totalDays >= 5 && totalDays < 10) {
+      setDiscountApplied(true);
       setDiscountText("5% تخفیف");
-    } else if (selectedDays.length >= 10 && selectedDays.length < 15) {
-      setDisCount(true);
+    } else if (totalDays >= 10 && totalDays < 15) {
+      setDiscountApplied(true);
       setDiscountText("15% تخفیف");
-    } else if (selectedDays.length >= 15) {
-      setDisCount(true);
+    } else if (totalDays >= 15) {
+      setDiscountApplied(true);
       setDiscountText("25% تخفیف");
     }
-  }, [selectedDays]);
+
+    // به‌روزرسانی selectedDays در context برای استفاده در صفحات بعدی
+    const allSelectedDays = [];
+    Object.entries(monthlySelections).forEach(([month, days]) => {
+      days.forEach((day) => {
+        allSelectedDays.push({ month, day });
+      });
+    });
+
+    setSelectedDays(allSelectedDays);
+    setIsCalendarSelected(totalDays > 0);
+
+    // فراخوانی صریح calculateTotalPrice
+    if (allSelectedDays.length > 0 && seatType) {
+      calculateTotalPrice();
+    }
+  }, [monthlySelections, seatType]);
 
   // قیمت ها
   const price = [
@@ -96,11 +185,24 @@ const MultiDiaily = () => {
   const changeMonth = (amount) => {
     const newDate = moment(currentDate).add(amount, "jMonth");
     setCurrentDate(newDate);
-    setCurrentMonth(newDate.format("jMMMM jYYYY"));
+    const newMonth = newDate.format("jMMMM jYYYY");
+    setCurrentMonth(newMonth);
     setCalendarDays(getMonthDays());
-    setSelectedDays([]); // پاک کردن روزهای انتخاب شده با تغییر ماه
-    if (selectedDays.length > 0) {
-      setIsCalendarSelected(false);
+
+    // اطمینان از اینکه وضعیت باز/بسته برای ماه جدید تنظیم شده است
+    if (expandedMonths[newMonth] === undefined) {
+      setExpandedMonths((prev) => ({
+        ...prev,
+        [newMonth]: true, // ماه جدید به صورت پیش‌فرض باز باشد
+      }));
+    }
+
+    // ایجاد آرایه خالی برای ماه جدید اگر وجود ندارد
+    if (!monthlySelections[newMonth]) {
+      setMonthlySelections((prev) => ({
+        ...prev,
+        [newMonth]: [],
+      }));
     }
   };
 
@@ -109,31 +211,72 @@ const MultiDiaily = () => {
     setCalendarDays(getMonthDays());
   }, [currentDate]);
 
+  // اضافه کردن یا حذف روز از انتخاب‌های ماه فعلی
   const handleDaySelect = (day) => {
     if (!day) return; // برای سلول های خالی
 
-    if (!isCalendarSelected) {
-      setIsCalendarSelected(true);
+    const month = currentMonth;
+
+    // اطمینان از اینکه ماه فعلی در monthlySelections وجود دارد
+    if (!monthlySelections[month]) {
+      setMonthlySelections((prev) => ({
+        ...prev,
+        [month]: [],
+      }));
     }
 
-    if (selectedDays.includes(day)) {
-      setSelectedDays(selectedDays.filter((d) => d !== day));
-      if (selectedDays.length <= 1) {
-        setIsCalendarSelected(false);
+    // افزودن یا حذف روز از انتخاب‌های ماه فعلی
+    setMonthlySelections((prev) => {
+      const currentMonthSelections = prev[month] || [];
+
+      if (currentMonthSelections.includes(day)) {
+        // حذف روز اگر قبلاً انتخاب شده است
+        return {
+          ...prev,
+          [month]: currentMonthSelections.filter((d) => d !== day),
+        };
+      } else {
+        // افزودن روز اگر قبلاً انتخاب نشده است
+        return {
+          ...prev,
+          [month]: [...currentMonthSelections, day].sort((a, b) => a - b),
+        };
       }
-    } else {
-      setSelectedDays([...selectedDays, day].sort((a, b) => a - b));
-    }
+    });
+
+    // اطمینان از اینکه ماه در لیست باز است
+    setExpandedMonths((prev) => ({
+      ...prev,
+      [month]: true,
+    }));
   };
 
   // حذف روز از لیست روزهای انتخابی
-  const removeSelectedDay = (day) => {
-    const updatedDays = selectedDays.filter((d) => d !== day);
-    setSelectedDays(updatedDays);
+  const removeSelectedDay = (month, day) => {
+    setMonthlySelections((prev) => ({
+      ...prev,
+      [month]: prev[month].filter((d) => d !== day),
+    }));
 
-    if (updatedDays.length === 0) {
-      setIsCalendarSelected(false);
-    }
+    // این محاسبه در useEffect انجام خواهد شد
+  };
+
+  // حذف تمام روزهای انتخابی یک ماه
+  const clearMonthSelections = (month) => {
+    setMonthlySelections((prev) => ({
+      ...prev,
+      [month]: [],
+    }));
+
+    // این محاسبه در useEffect انجام خواهد شد
+  };
+
+  // تغییر وضعیت باز/بسته بودن لیست رزرو یک ماه
+  const toggleMonthExpansion = (month) => {
+    setExpandedMonths((prev) => ({
+      ...prev,
+      [month]: !prev[month],
+    }));
   };
 
   // بررسی آیا روز مورد نظر جمعه است
@@ -150,6 +293,20 @@ const MultiDiaily = () => {
   const formatDate = (day) => {
     if (!day) return "";
     return moment(currentDate).jDate(day).format("jD jMMMM");
+  };
+
+  // هدایت به صفحه بعدی - اصلاح شده
+  const handleContinue = () => {
+    if (getTotalSelectedDays() > 0 && seatType) {
+      // اول وضعیت مرحله را در کانتکست تغییر می‌دهیم
+      goToNextStep();
+
+      // برای اطمینان از اینکه داده‌ها در کانتکست ذخیره شده‌اند
+      setTimeout(() => {
+        // سپس به صفحه پرداخت هدایت می‌کنیم
+        router.push("/Reservation-Pick/Payment-Daily-Online");
+      }, 100);
+    }
   };
 
   return (
@@ -259,7 +416,7 @@ const MultiDiaily = () => {
                   day ? "cursor-pointer" : ""
                 } rounded-[4px] transition-colors
                   ${
-                    day && selectedDays.includes(day)
+                    day && monthlySelections[currentMonth]?.includes(day)
                       ? "bg-[#B4E6F8] text-[#404040]"
                       : ""
                   }
@@ -309,60 +466,88 @@ const MultiDiaily = () => {
                 تعداد روز انتخابی
               </span>
               <span className="text-[#404040] text-[14px] font-xbold">
-                {selectedDays.length}
+                {getTotalSelectedDays()}
               </span>
             </div>
 
-            {/* نمایش لیست روزهای انتخاب شده */}
-            {selectedDays.length > 0 && (
-              <div className="mt-4 px-4 pb-4 pt-2 rounded-lg border border-[#ADADAD]">
-                <div className="flex items-center justify-between px-1">
-                  <span className="text-[#4073D0] text-[12px] font-xbold">
-                    {selectedDays.length} روز
-                  </span>
-                  <h2 className="text-[#404040]  text-[12px] font-xbold">
-                    {currentMonth}
-                  </h2>
-                  <button className="flex items-center gap-2">
-                    <img src="/admin-panel/trash.svg" alt="img" />
-                    <img src="/admin-panel/chevron-down.svg" alt="img" />
-                  </button>
-                </div>
-                <ul className=" mt-2">
-                  {selectedDays.map((day) => (
-                    <li
-                      key={day}
-                      className="flex items-center justify-between p-[5px] rounded-md odd:bg-[#F9F9F9] even:bg-white"
+            {/* نمایش لیست روزهای انتخاب شده به تفکیک ماه */}
+            {Object.entries(monthlySelections)
+              .filter(([month, days]) => days.length > 0)
+              .map(
+                ([month, days]) =>
+                  days.length > 0 && (
+                    <div
+                      key={month}
+                      className="mt-4 px-4 pb-4 pt-2 rounded-lg border border-[#ADADAD]"
                     >
-                      <span className="text-[#404040] text-[12px] font-xregular">
-                        {day} {currentDate.format("jMMMM jYYYY")}
-                      </span>
-                      <button onClick={() => removeSelectedDay(day)}>
-                        <img src="/admin-panel/close-circle.svg" alt="img" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+                      <div className="flex items-center justify-between px-1">
+                        <span className="text-[#4073D0] text-[12px] font-xbold">
+                          {days.length} روز
+                        </span>
+                        <h2 className="text-[#404040] text-[12px] font-xbold">
+                          {month}
+                        </h2>
+                        <div className="flex items-center">
+                          <button
+                            onClick={() => clearMonthSelections(month)}
+                            className="mr-2"
+                          >
+                            <img src="/admin-panel/trash.svg" alt="حذف همه" />
+                          </button>
+                          <button onClick={() => toggleMonthExpansion(month)}>
+                            <img
+                              src="/admin-panel/chevron-down.svg"
+                              alt="باز/بسته"
+                              className={`transform ${
+                                expandedMonths[month] ? "rotate-180" : ""
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      </div>
+
+                      {expandedMonths[month] && (
+                        <ul className="mt-2">
+                          {days.map((day) => (
+                            <li
+                              key={day}
+                              className="flex items-center justify-between p-[5px] rounded-md odd:bg-[#F9F9F9] even:bg-white"
+                            >
+                              <span className="text-[#404040] text-[12px] font-xregular">
+                                {day} {month}
+                              </span>
+                              <button
+                                onClick={() => removeSelectedDay(month, day)}
+                              >
+                                <img
+                                  src="/admin-panel/close-circle.svg"
+                                  alt="حذف"
+                                />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )
+              )}
           </div>
-          {selectedDays.length > 0 && (
-            <div >
+
+          {getTotalSelectedDays() > 0 && (
+            <div>
               <div className="flex items-center justify-between mt-4 px-2 py-[10.5px] rounded-lg">
                 <span className="text-[#404040] text-[14px] font-xregular">
                   قیمت کل
                 </span>
                 <span className="text-[#404040] text-[14px] font-xregular">
-                  {selectedDays.length * 100000} تومان
+                  {totalPrice.toLocaleString()} تومان
                 </span>
               </div>
-              {disCount && (
+              {discountText && (
                 <div className="flex flex-col px-2 py-[10.5px]">
-                  <div className="  text-[14px] flex items-center justify-between">
-                    <span className=" font-xregular text-[#404040]  ">
-                      تخفیف
-                    </span>
-                    <span className="text-[#3BC377] font-xbold ">
+                  <div className="text-[14px] flex items-center justify-between">
+                    <span className="font-xregular text-[#404040]">تخفیف</span>
+                    <span className="text-[#3BC377] font-xbold">
                       {discountText}
                     </span>
                   </div>
@@ -372,43 +557,39 @@ const MultiDiaily = () => {
                       src="/admin-panel/info.svg"
                       alt="img"
                     />
-                    <span className="text-[#4073D0] text-[12px] font-xregular ">
+                    <span className="text-[#4073D0] text-[12px] font-xregular">
                       در صورت وجود چندین تخفیف، فقط بیشترین مقدار تخفیف برای شما
                       محاسبه می‌شود.
                     </span>
                   </div>
                 </div>
               )}
-              <div className="  text-[14px] flex items-center justify-between px-2 py-[10.5px]">
-                <span className=" font-xregular text-[#404040]  ">
+              <div className="text-[14px] flex items-center justify-between px-2 py-[10.5px]">
+                <span className="font-xregular text-[#404040]">
                   موجودی کیف پول
                 </span>
-                <span className="text-[#404040] font-xregular ">
-                  ۲۰۰٬۰۰۰ تومان
+                <span className="text-[#404040] font-xregular">
+                  {walletBalance.toLocaleString()} تومان
                 </span>
               </div>
-              <div className="  text-[14px] flex items-center justify-between px-2 py-[10.5px]">
-                <span className=" font-xbold text-[#404040]  ">
+              <div className="text-[14px] flex items-center justify-between px-2 py-[10.5px]">
+                <span className="font-xbold text-[#404040]">
                   مبلغ قابل پرداخت
                 </span>
-                <span className="text-[#404040] font-xbold ">
-                  ۲۸5٬۰۰۰ تومان
+                <span className="text-[#404040] font-xbold">
+                  {finalPrice.toLocaleString()} تومان
                 </span>
               </div>
             </div>
           )}
           <button
             className={`w-full mt-4 text-[16px] font-xmedium py-3 text-white rounded-lg ${
-              isCalendarSelected && seatType
+              getTotalSelectedDays() > 0 && seatType
                 ? "bg-[#253359]"
                 : "bg-[#A3A3A3] cursor-not-allowed"
             }`}
-            onClick={() =>
-              isCalendarSelected &&
-              seatType &&
-              setActiveStep((prev) => prev + 1)
-            }
-            disabled={!isCalendarSelected || !seatType}
+            onClick={handleContinue}
+            disabled={getTotalSelectedDays() === 0 || !seatType}
           >
             تایید و ادامه
           </button>
@@ -417,6 +598,5 @@ const MultiDiaily = () => {
     </div>
   );
 };
-
 
 export default MultiDiaily;

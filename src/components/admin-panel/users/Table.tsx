@@ -1,11 +1,15 @@
-"use client"
+"use client";
 import React, { useState, useEffect } from "react";
 import axios, { AxiosError } from "axios";
 import { LuUserRoundX } from "react-icons/lu";
 import { SlEye } from "react-icons/sl";
+
+
 import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
 import Image from "next/image";
+
 import DeleteModal from "./DeleteModal";
+import Pagination from "../Pagination";
 
 interface UserData {
   id: string;
@@ -27,6 +31,11 @@ interface ApiResponse {
   nationalCode: string;
   phoneNumber: string;
   hasProfilePhoto: boolean;
+}
+
+interface ApiResult {
+  data: ApiResponse[];
+  totalCount: number;
 }
 
 interface TableProps {
@@ -51,6 +60,26 @@ export default function Table({ onSelectUsers, userTypeFilter }: TableProps) {
           `https://109.230.200.230:7890/api/v1/Admins/Users?page=${currentPage}&pageSize=${pageSize}&userType=${userTypeFilter}&orderBy=CreationTime&sortOrder=DESC`,
           { withCredentials: true }
         );
+        
+        // بررسی وجود هدر تعداد کل آیتم‌ها
+        let totalCount = 0;
+        
+        // اگر هدر x-total-count وجود دارد، از آن استفاده کن
+        if (response.headers['x-total-count']) {
+          totalCount = parseInt(response.headers['x-total-count'], 10);
+        }
+        // اگر تعداد کل در بدنه پاسخ وجود دارد (بسته به API شما)
+        else if (response.data && typeof response.data === 'object' && 'totalCount' in response.data) {
+          // اگر API کل اطلاعات را در یک آبجکت با فیلدهای data و totalCount بر می‌گرداند
+          const result = response.data as unknown as ApiResult;
+          totalCount = result.totalCount;
+        }
+        // در غیر این صورت، از تعداد آیتم‌های دریافتی استفاده کن
+        else {
+          totalCount = response.data.length;
+        }
+        
+        setTotalUsers(totalCount);
 
         const formattedData: UserData[] = await Promise.all(
           response.data.map(async (item, index) => {
@@ -66,14 +95,6 @@ export default function Table({ onSelectUsers, userTypeFilter }: TableProps) {
                   }
                 );
 
-                console.log(`پاسخ API عکس برای کاربر ${item.id}:`, imageResponse.data);
-
-                const reader = new FileReader();
-                reader.readAsDataURL(imageResponse.data);
-                reader.onloadend = () => {
-                  console.log(`Base64 عکس برای کاربر ${item.id}:`, reader.result);
-                };
-
                 profileImage = URL.createObjectURL(imageResponse.data);
               } catch (imgError: AxiosError | Error) {
                 console.error(`خطا در دریافت عکس پروفایل کاربر ${item.id}: ${imgError.message}`);
@@ -82,7 +103,7 @@ export default function Table({ onSelectUsers, userTypeFilter }: TableProps) {
 
             return {
               id: item.id,
-              row: ((currentPage - 1) * pageSize + index + 1).toString(), // محاسبه شماره ردیف با توجه به صفحه
+              row: ((currentPage - 1) * pageSize + index + 1).toString(),
               email: item.email || "نامشخص",
               name: `${item.firstName} ${item.lastName}`,
               date: new Date(item.creationTime).toLocaleDateString("fa-IR"),
@@ -101,12 +122,17 @@ export default function Table({ onSelectUsers, userTypeFilter }: TableProps) {
       } catch (error: AxiosError | Error | unknown) {
         const errorMessage = error instanceof Error ? error.message : 'خطای ناشناخته';
         setError(`خطا در بارگذاری داده‌ها: ${errorMessage}`);
+
+      } catch (error: any) {
+        setError(`خطا در بارگذاری داده‌ها: ${error.message}`);
+
       }
     };
 
     fetchData();
 
-    // Clean up function
+
+    // cleanup برای آزادساز
     return () => {
       // Clean up blob URLs
       info.forEach((item) => {
@@ -116,6 +142,9 @@ export default function Table({ onSelectUsers, userTypeFilter }: TableProps) {
       });
     };
   }, [currentPage, userTypeFilter, pageSize]); // Added pageSize to dependency array
+
+  }, [currentPage, userTypeFilter, pageSize]);
+
 
   const handleCheckboxChange = (id: string) => {
     setSelectedIds((prev) => {
@@ -142,6 +171,8 @@ export default function Table({ onSelectUsers, userTypeFilter }: TableProps) {
         { withCredentials: true }
       );
       setInfo((prevInfo) => prevInfo.filter((item) => item.id !== selectedUser.id));
+      // کاهش تعداد کل کاربران پس از حذف
+      setTotalUsers(prev => Math.max(0, prev - 1));
       setIsModalOpen(false);
       setSelectedUser(null);
     } catch (error: AxiosError | Error | unknown) {
@@ -156,12 +187,8 @@ export default function Table({ onSelectUsers, userTypeFilter }: TableProps) {
     setSelectedUser(null);
   };
 
-  const totalPages = Math.ceil(totalUsers / pageSize);
-
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
   };
 
   return (
@@ -229,40 +256,14 @@ export default function Table({ onSelectUsers, userTypeFilter }: TableProps) {
           </tbody>
         </table>
       </div>
-      <div className="flex items-center mt-[35px] w-full">
-        <div className="w-3/12">
-          <span className="text-[#868686] font-xregular text-[12px]">
-            نمایش <span className="text-[#202020] font-xbold">{info.length}</span> از {totalUsers} نتیجه
-          </span>
-        </div>
-        <div className="join flex items-center justify-center w-full mr-[-190px] text-[14px] font-xregular gap-[9px]">
-          <button
-            className="bg-[#EDEDED] p-[6px] rounded-[6.67px]"
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            <IoIosArrowForward className="w-4 h-4 text-[#606060]" />
-          </button>
-          {[...Array(totalPages)].map((_, index) => (
-            <button
-              key={index + 1}
-              className={`px-[10.8px] py-[2.8px] rounded-[6.67px] ${
-                currentPage === index + 1 ? "bg-[#253359] text-white" : "bg-[#F1F8FF]"
-              }`}
-              onClick={() => handlePageChange(index + 1)}
-            >
-              {index + 1}
-            </button>
-          ))}
-          <button
-            className="bg-[#EDEDED] p-[6px] rounded-[6.67px]"
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            <IoIosArrowBack className="w-4 h-4 text-[#606060]" />
-          </button>
-        </div>
-      </div>
+
+      {/* استفاده از کامپوننت پگینیشن */}
+      <Pagination
+        currentPage={currentPage}
+        totalItems={totalUsers}
+        pageSize={pageSize}
+        onPageChange={handlePageChange}
+      />
 
       <DeleteModal
         isOpen={isModalOpen}

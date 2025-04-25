@@ -15,13 +15,14 @@ export default function RootLayout({
 }>) {
   const headersList = headers();
   const isAdminPanel = headersList.get("x-is-admin-panel") === "true";
+  const isReservationPick = headersList.get("x-is-reservation-pick") === "true";
 
   return (
     <html lang="en">
       <body dir="rtl">
         {!isAdminPanel && <Navbar />}
         {children}
-        {!isAdminPanel && <Footer />}
+        {!isAdminPanel || !isReservationPick && <Footer />}
       </body>
     </html>
   );

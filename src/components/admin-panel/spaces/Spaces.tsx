@@ -63,15 +63,14 @@ export default function Spaces() {
                 defaultChecked
                 className="checkbox md:hidden"
               />
-              <div className="flex items-center gap-4">
+              <div className="flex items-center w-full">
                 <form noValidate onSubmit={handleSubmit(onSubmit)}>
-                  <div className="flex items-center w-full">
-                    <label className="border border-[#ADADAD] rounded-[8px] px-4 py-[11px] md:py-2 flex items-center gap-2 ">
-                      <LuCalendarFold className="w-6 h-6 text-[#ADADAD]" />
+                  <div className="flex items-center justify-between w-full">
+                    <label className="border border-[#ADADAD] w-[160px]  rounded-[8px] px-4 py-[11px] md:py-2 flex items-center justify-between gap-2 ">
                       <select
                         id="select"
                         {...register("select")}
-                        className="text-[14px] font-xregular text-[#606060] "
+                        className="text-[14px] font-xregular w-full text-[#606060] "
                       >
                         <option value="option1"> جدیدترین </option>
                         <option value="option2"> همه </option>

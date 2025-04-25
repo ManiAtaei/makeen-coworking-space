@@ -164,9 +164,9 @@ export default function Dashboard() {
         <div className="border-[#4073D0] border rounded-[16px] mt-4 pt-4 pb-2 px-[18.18px] lg:border-0 lg:bg-white w-full">
           <div className="flex items-center justify-between w-full">
             <span className="text-[#253359] text-[12px] lg:text-[14px] font-xbold">
-              نمودار رزروها
+            نمودار درآمدها
             </span>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-[20.17px] ml-3">
               <form noValidate onSubmit={handleSubmit(onSubmit)}>
                 <div>
                   <select
@@ -179,15 +179,15 @@ export default function Dashboard() {
                   </select>
                 </div>
               </form>
-              <RiMore2Fill className="w-[19px] h-[19px]" />
+              <img src="/admin-panel/Vector.svg" alt="img" />
             </div>
           </div>
           <div className="w-full">
             <Suspense fallback={<div>در حال بارگذاری نمودار...</div>}>
-              <ChartBar />
+              <LineChart />
             </Suspense>
           </div>
-          <div className="flex items-center gap-3 mt-[-30px]">
+          <div className="flex items-center gap-3 mt-[-60px]">
             <div className="flex items-center gap-2">
               <FaSquare className="text-[#668FD9]" />
               <span className="text-[#868686] font-xregular text-[10px]">
@@ -207,7 +207,7 @@ export default function Dashboard() {
             <span className="text-[#253359] text-[12px] lg:text-[14px] font-xbold">
               نمودار رزروها
             </span>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-[20.17px] ml-7">
               <form noValidate onSubmit={handleSubmit(onSubmit)}>
                 <div>
                   <select
@@ -220,15 +220,15 @@ export default function Dashboard() {
                   </select>
                 </div>
               </form>
-              <RiMore2Fill className="w-[19px] h-[19px]" />
+              <img src="/admin-panel/Vector.svg" alt="img" />
             </div>
           </div>
           <div className="w-full">
             <Suspense fallback={<div>در حال بارگذاری نمودار...</div>}>
-              <LineChart />
+              <ChartBar />
             </Suspense>
           </div>
-          <div className="flex items-center gap-3 mt-[-60px]">
+          <div className="flex items-center gap-3 mt-[-30px]">
             <div className="flex items-center gap-2">
               <FaSquare className="text-[#668FD9]" />
               <span className="text-[#868686] font-xregular text-[10px]">

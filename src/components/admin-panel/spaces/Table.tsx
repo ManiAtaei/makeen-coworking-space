@@ -1,10 +1,9 @@
-"use client"; 
+"use client";
 import React, { useEffect, useState } from "react";
 import { LuTrash2 } from "react-icons/lu";
 import { SlEye } from "react-icons/sl";
-import { IoIosArrowForward } from "react-icons/io";
-import { IoIosArrowBack } from "react-icons/io";
 import axios from "axios";
+import Pagination from "../Pagination";
 
 interface ReservationSpace {
   id: string;
@@ -19,6 +18,8 @@ interface ReservationSpace {
 export default function Table() {
   const [info, setInfo] = useState<ReservationSpace[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10); // تعداد آیتم‌ها در هر صفحه
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,7 +27,7 @@ export default function Table() {
         const response = await axios.get<ReservationSpace[]>(
           "https://109.230.200.230:7890/api/v1/Users/Reservation-Spaces",
           {
-            withCredentials: true, // اگر احراز هویت با کوکی‌ها نیازه
+            withCredentials: true,
           }
         );
 
@@ -41,7 +42,19 @@ export default function Table() {
     };
 
     fetchData();
-  }, []);
+  }, []); // فقط یک بار هنگام لود صفحه اجرا می‌شه
+
+  // تعداد کل نتایج
+  const totalResults = info.length;
+
+  // فیلتر کردن داده‌ها برای صفحه فعلی (صفحه‌بندی سمت کلاینت)
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedInfo = info.slice(startIndex, endIndex);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
 
   return (
     <div>
@@ -65,7 +78,7 @@ export default function Table() {
             </tr>
           </thead>
           <tbody>
-            {info.map((item, index) => (
+            {paginatedInfo.map((item, index) => (
               <tr
                 key={item.id}
                 className="odd:bg-[#F9F9F9] even:bg-[#FFFFFF] text-[14px] font-xregular text-[#202020]"
@@ -75,7 +88,7 @@ export default function Table() {
                     <input type="checkbox" className="checkbox" />
                   </label>
                 </th>
-                <td>{index + 1}</td>
+                <td>{startIndex + index + 1}</td>
                 <td>ثابت (نیاز به داده)</td> {/* تاریخ توی API نیست */}
                 <td>{item.name}</td>
                 <td>{item.pricePerReserveForStudents.toLocaleString("fa-IR")} تومان</td>
@@ -90,32 +103,14 @@ export default function Table() {
           </tbody>
         </table>
       </div>
-      <div className="flex items-center mt-[35px] w-full">
-        <div className="w-3/12">
-          <span className="text-[#868686] font-xregular text-[12px]">
-            نمایش{" "}
-            <span className="text-[#202020] font-xbold">{info.length}</span> از
-            68 نتیجه
-          </span>
-        </div>
-        <div className="join flex items-center justify-center w-full mr-[-190px] text-[14px] font-xregular gap-[9px]">
-          <button className="bg-[#EDEDED] p-[6px] rounded-[6.67px]">
-            <IoIosArrowForward className="w-4 h-4 text-[#606060] rounded-[4px]" />
-          </button>
-          <button className="bg-[#F1F8FF] px-[10.8px] py-[2.8px] rounded-[6.67px]">
-            1
-          </button>
-          <button className="bg-[#F1F8FF] px-[10.8px] py-[2.8px] rounded-[6.67px]">
-            2
-          </button>
-          <button className="bg-[#F1F8FF] px-[10.8px] py-[2.8px] rounded-[6.67px]">
-            3
-          </button>
-          <button className="bg-[#EDEDED] p-[6px] rounded-[6.67px]">
-            <IoIosArrowBack className="w-4 h-4 text-[#606060]" />
-          </button>
-        </div>
-      </div>
+      
+      {/* استفاده از کامپوننت پگینیشن */}
+      <Pagination
+        currentPage={currentPage}
+        totalItems={totalResults}
+        pageSize={pageSize}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 }

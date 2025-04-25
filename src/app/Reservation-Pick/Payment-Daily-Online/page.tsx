@@ -1,57 +1,181 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AiOutlineExclamationCircle } from "react-icons/ai";
 import { IoCloseCircleOutline } from "react-icons/io5";
+import { useRouter } from "next/navigation";
+import moment from "jalali-moment";
+import { useReservation } from "../(Reservation-Multi-Daily)/ReservationContext";
 
 export default function DailyOnline() {
-  const [activeStep, setActiveStep] = useState(0);
-  const [selectedDays, setSelectedDays] = useState([]);
+  const router = useRouter();
+  const [activeStep, setActiveStep] = useState(2); // شماره مرحله پرداخت
+  
+  // استفاده از context
+  const {
+    seatType,
+    selectedDays,
+    totalPrice,
+    discountText,
+    walletBalance,
+    finalPrice,
+    isStudentMakin,
+    studentPrice,
+    regularPrice,
+    setSelectedDays,
+    calculateTotalPrice,
+    goToPreviousStep,
+  } = useReservation();
+  
+  // وضعیت باز بودن هر ماه در لیست رزروها
+  const [expandedMonths, setExpandedMonths] = useState({});
+  
+  // گروه‌بندی روزهای انتخابی بر اساس ماه
+  const [groupedDays, setGroupedDays] = useState({});
 
-  const Inventory = [{ id: 1, total: " 250,000 " }];
+  // گروه‌بندی روزهای انتخابی بر اساس ماه
+  useEffect(() => {
+    if (selectedDays && selectedDays.length > 0) {
+      // گروه‌بندی روزها براساس ماه
+      const grouped = selectedDays.reduce((result, dayItem) => {
+        const { month } = dayItem;
+        if (!result[month]) {
+          result[month] = [];
+          // به صورت پیش‌فرض هر ماه باز باشد
+          setExpandedMonths(prev => ({
+            ...prev,
+            [month]: true
+          }));
+        }
+        result[month].push(dayItem);
+        return result;
+      }, {});
+      
+      setGroupedDays(grouped);
+    } else {
+      setGroupedDays({});
+    }
+  }, [selectedDays]);
+  
+  // ایجاد آرایه جزئیات با مقادیر واقعی از context
   const details = [
     {
       id: 1,
       title: " نوع اشتراک ",
-      Description: " صندلی اشتراکی ",
+      Description: seatType || " صندلی اشتراکی ",
       res: " text-[#404040] text-[14px] font-xregular ",
     },
     {
       id: 2,
       title: " تعداد روز انتخابی ",
-      Description: "7",
+      Description: selectedDays.length.toString() || "0",
       res: " text-[#404040] text-[14px] font-xregular ",
     },
     {
       id: 3,
       title: " قیمت عادی ",
-      Description: "100,000 تومان ",
+      Description: `${regularPrice.toLocaleString()} تومان`,
       res: "text-[#202020] text-[14px] font-xregular",
     },
     {
       id: 4,
       title: " قیمت دانشجو مکین ",
-      Description: "60,000 تومان",
+      Description: `${studentPrice.toLocaleString()} تومان`,
       res: " text-[#3BC377] text-[14px] font-xregular ",
     },
     {
       id: 5,
       title: " قیمت کل ",
-      Description: "300,000 تومان",
+      Description: `${totalPrice.toLocaleString()} تومان`,
       res: " text-[#404040] text-[14px] font-xregular ",
     },
     {
       id: 6,
       title: " تخفیف ",
-      Description: " ۵٪ رزرو بلند مدت ",
+      Description: discountText || " ٪۰ ",
       res: " text-[#3BC377] text-[14px] font-xbold ",
     },
     {
       id: 7,
       title: " مبلغ قابل پرداخت ",
-      Description: "270,000 تومان",
+      Description: `${finalPrice.toLocaleString()} تومان`,
       res: "text-[#404040] text-[14px] font-xbold",
     },
   ];
+
+  // اطلاعات کیف پول
+  const Inventory = [{ id: 1, total: walletBalance.toLocaleString() }];
+
+  // بازگشت به مرحله قبل
+  const handlePrevStep = () => {
+    goToPreviousStep(); // تغییر وضعیت در context
+    router.push("/Reservation-Pick"); // مسیر صفحه MultiDiaily
+  };
+
+  // تأیید و پرداخت
+  const handlePayment = () => {
+    try {
+      // اینجا می‌توانید منطق پرداخت را اضافه کنید
+      setActiveStep((prev) => prev + 1);
+      router.push("/payment-confirmation"); // مسیر صفحه تأیید پرداخت
+    } catch (error) {
+      console.error("خطا در پرداخت:", error);
+      alert("مشکلی در پرداخت رخ داده است. لطفاً دوباره تلاش کنید.");
+    }
+  };
+
+  // حذف یک روز از لیست روزهای انتخابی
+  const handleRemoveDay = (month, day) => {
+    // حذف روز از آرایه selectedDays
+    const updatedDays = selectedDays.filter(
+      (item) => !(item.month === month && item.day === day)
+    );
+    
+    // به‌روزرسانی لیست روزهای انتخاب شده
+    setSelectedDays(updatedDays);
+    
+    // به‌روزرسانی گروه‌بندی
+    const updatedGrouped = { ...groupedDays };
+    updatedGrouped[month] = updatedGrouped[month].filter(item => item.day !== day);
+    
+    // اگر ماه خالی شد، آن را حذف کنیم
+    if (updatedGrouped[month].length === 0) {
+      delete updatedGrouped[month];
+    }
+    
+    setGroupedDays(updatedGrouped);
+    
+    // به‌روزرسانی قیمت‌ها
+    setTimeout(() => {
+      calculateTotalPrice();
+    }, 100);
+  };
+
+  // حذف تمام روزهای یک ماه
+  const clearMonthSelections = (month) => {
+    // حذف همه روزهای این ماه از آرایه selectedDays
+    const updatedDays = selectedDays.filter(item => item.month !== month);
+    
+    // به‌روزرسانی لیست روزهای انتخاب شده
+    setSelectedDays(updatedDays);
+    
+    // به‌روزرسانی گروه‌بندی
+    const updatedGrouped = { ...groupedDays };
+    delete updatedGrouped[month];
+    setGroupedDays(updatedGrouped);
+    
+    // به‌روزرسانی قیمت‌ها
+    setTimeout(() => {
+      calculateTotalPrice();
+    }, 100);
+  };
+
+  // تغییر وضعیت باز/بسته بودن لیست رزرو یک ماه
+  const toggleMonthExpansion = (month) => {
+    setExpandedMonths(prev => ({
+      ...prev,
+      [month]: !prev[month]
+    }));
+  };
 
   return (
     <div className="bg-white rounded-t-2xl mt-[13px] pt-4 px-6 h-full ">
@@ -76,7 +200,6 @@ export default function DailyOnline() {
                 type="radio"
                 name="radio-7"
                 className="radio radio-info w-5 h-5"
-                defaultChecked
               />
               پرداخت از کیف پول
             </div>
@@ -112,34 +235,79 @@ export default function DailyOnline() {
         </div>
 
         <div className="w-[31.6%]">
-          <h3 className="text-[#404040] text-[14px] font-xbold mt-4">
+          <h3 className="text-[#404040] text-[14px] font-xbold">
             لیست رزرو انتخابی شما
           </h3>
-          {selectedDays.length > 0 && (
-            <div className="space-y-2">
-              {selectedDays.map((day) => (
-                <div
-                  key={day}
-                  className="flex items-center justify-between p-2 odd:bg-[#F9F9F9] even:bg-white rounded-lg"
-                >
-                  <span className="text-[#404040] text-[12px] font-xregular">{`۱۴۰۳/۱۱/${day}`}</span>
-                  <button className="text-[#ADADAD] rounded">
-                    <IoCloseCircleOutline className="w-5 h-5" />
-                  </button>
+          
+          {/* نمایش تعداد روزهای انتخابی */}
+          <div className="flex items-center justify-between p-2 bg-[#F9F9F9] rounded-lg mt-2">
+            <span className="text-[#404040] text-[14px] font-xregular">
+              تعداد روز انتخابی
+            </span>
+            <span className="text-[#404040] text-[14px] font-xbold">
+              {selectedDays.length}
+            </span>
+          </div>
+          
+          {/* نمایش لیست روزهای انتخاب شده به تفکیک ماه */}
+          <div className="space-y-2 mt-2">
+            {Object.entries(groupedDays).map(([month, days]) => (
+              <div key={month} className="mt-2 px-4 pb-4 pt-2 rounded-lg border border-[#ADADAD]">
+                <div className="flex items-center justify-between px-1">
+                  <span className="text-[#4073D0] text-[12px] font-xbold">
+                    {days.length} روز
+                  </span>
+                  <h2 className="text-[#404040] text-[12px] font-xbold">
+                    {month}
+                  </h2>
+                  <div className="flex items-center">
+                    <button 
+                      onClick={() => clearMonthSelections(month)}
+                      className="mr-2"
+                    >
+                      <img src="/admin-panel/trash.svg" alt="حذف همه" />
+                    </button>
+                    <button onClick={() => toggleMonthExpansion(month)}>
+                      <img 
+                        src="/admin-panel/chevron-down.svg" 
+                        alt="باز/بسته" 
+                        className={`transform ${expandedMonths[month] ? 'rotate-180' : ''}`}
+                      />
+                    </button>
+                  </div>
                 </div>
-              ))}
-            </div>
-          )}
+                
+                {expandedMonths[month] && (
+                  <ul className="mt-2">
+                    {days.map((dayItem, index) => (
+                      <li
+                        key={index}
+                        className="flex items-center justify-between p-[5px] rounded-md odd:bg-[#F9F9F9] even:bg-white"
+                      >
+                        <span className="text-[#404040] text-[12px] font-xregular">
+                          {dayItem.day} {month}
+                        </span>
+                        <button onClick={() => handleRemoveDay(month, dayItem.day)}>
+                          <img src="/admin-panel/close-circle.svg" alt="حذف" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
+          
           <div className="flex items-center mt-4 gap-4">
             <button
               className="border border-[#253359] w-full text-[14px] font-xmedium py-[8.5px] text-[#253359] rounded-lg"
-              onClick={() => setActiveStep((prev) => prev - 1)}
+              onClick={handlePrevStep}
             >
               مرحله قبل
             </button>
             <button
               className="bg-[#253359] w-full text-[14px] font-xmedium py-[9.5px] text-white rounded-lg"
-              onClick={() => setActiveStep((prev) => prev + 1)}
+              onClick={handlePayment}
             >
               تایید و پرداخت
             </button>

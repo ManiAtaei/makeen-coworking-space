@@ -6,8 +6,8 @@ import { GoPlusCircle } from "react-icons/go";
 import { GrAttachment } from "react-icons/gr";
 import { FieldErrors, useForm } from "react-hook-form";
 import { useDropzone } from "react-dropzone";
-import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
 import axios from "axios";
+import Pagination from "./Pagination";
 
 interface FeatureData {
   Feature: string;
@@ -23,12 +23,16 @@ const Features = () => {
   const [loginError, setLoginError] = useState("");
   const [features, setFeatures] = useState<FeatureData[]>([]);
   const fileRef = useRef<File | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize] = useState<number>(10); // تعداد کاربران در هر صفحه
+  const [totalUsers, setTotalUsers] = useState<number>(0); // تعداد کل کاربران
 
   const form = useForm<dataType>({});
   const {
     handleSubmit,
     formState: { errors },
     register,
+    reset
   } = form;
 
   useEffect(() => {
@@ -50,8 +54,12 @@ const Features = () => {
         }));
 
         setFeatures(formattedFeatures);
+        setTotalUsers(formattedFeatures.length); // تنظیم تعداد کل آیتم‌ها
       } catch (error) {
-        console.error("خطا در دریافت امکانات:", error.response?.data || error.message);
+        console.error(
+          "خطا در دریافت امکانات:",
+          error.response?.data || error.message
+        );
         setLoginError("خطا در دریافت امکانات از سرور");
       }
     };
@@ -88,17 +96,21 @@ const Features = () => {
         const reader = new FileReader();
         reader.readAsDataURL(fileRef.current);
         reader.onloadend = () => {
-          setFeatures((prev) => [
-            ...prev,
+          const newFeatures = [
+            ...features,
             {
               Feature: data.feature,
               Icon: reader.result as string,
               enabled: true,
             },
-          ]);
+          ];
+          setFeatures(newFeatures);
+          setTotalUsers(newFeatures.length); // بروزرسانی تعداد کل آیتم‌ها
         };
 
         document.getElementById("my_modal_10")?.close();
+        reset(); // پاک کردن فرم
+        fileRef.current = null; // پاک کردن فایل انتخاب شده
       }
     } catch (error) {
       console.error("Error response:", error.response?.data || error.message);
@@ -113,16 +125,81 @@ const Features = () => {
     }
   };
 
+  // حذف یک ویژگی
+  const handleDeleteFeature = async (featureIndex: number) => {
+    try {
+      const featureToDelete = features[featureIndex];
+      
+      // فرض می‌کنیم API حذف امکان وجود دارد
+      // در صورت نبود این API، این بخش را کامنت کنید
+      /*
+      await axios.delete(
+        `https://109.230.200.230:7890/api/v1/Admins/Reservation-Spaces/Features/${encodeURIComponent(
+          featureToDelete.Feature
+        )}`,
+        {
+          withCredentials: true,
+        }
+      );
+      */
+      
+      // حذف از لیست محلی
+      const updatedFeatures = [...features];
+      updatedFeatures.splice(featureIndex, 1);
+      setFeatures(updatedFeatures);
+      setTotalUsers(updatedFeatures.length);
+      
+      setLoginError("ویژگی با موفقیت حذف شد");
+    } catch (error) {
+      console.error("خطا در حذف ویژگی:", error.response?.data || error.message);
+      setLoginError("خطا در حذف ویژگی");
+    }
+  };
+
+  // تغییر وضعیت فعال/غیرفعال یک ویژگی
+  const handleToggleFeature = (featureIndex: number) => {
+    const updatedFeatures = [...features];
+    updatedFeatures[featureIndex].enabled = !updatedFeatures[featureIndex].enabled;
+    setFeatures(updatedFeatures);
+    
+    // در صورت نیاز به ارسال به API
+    /*
+    const feature = updatedFeatures[featureIndex];
+    axios.put(
+      `https://109.230.200.230:7890/api/v1/Admins/Reservation-Spaces/Features/${encodeURIComponent(
+        feature.Feature
+      )}/toggle`,
+      { enabled: feature.enabled },
+      {
+        withCredentials: true,
+      }
+    );
+    */
+  };
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
   const onErrorHandler = (error: FieldErrors<dataType>) => {
     console.log(error);
   };
 
   const { getRootProps, getInputProps } = useDropzone({
-    accept: "image/svg+xml,image/png,image/jpeg",
+    accept: {
+      'image/svg+xml': ['.svg'],
+      'image/png': ['.png'],
+      'image/jpeg': ['.jpg', '.jpeg']
+    },
     onDrop: (acceptedFiles) => {
       fileRef.current = acceptedFiles[0];
     },
   });
+
+  // محاسبه امکانات مربوط به صفحه فعلی
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, features.length);
+  const currentFeatures = features.slice(startIndex, endIndex);
 
   return (
     <div className="px-5 max-w-[500px] mx-auto md:max-w-[900px] lg:max-w-[1440px] lg:mr-[260px] lg:px-6 lg:bg-white h-screen lg:rounded-lg">
@@ -144,7 +221,7 @@ const Features = () => {
         <p className="text-red-500 text-[12px] mt-4">{loginError}</p>
       )}
       <div className="grid grid-cols-2 gap-6 mt-6">
-        {features.map((item, index) => (
+        {currentFeatures.map((item, index) => (
           <div
             key={index}
             className="flex items-center justify-between py-[19px] pr-8 pl-4 bg-[#F4F5FC] rounded-lg shadow-sm"
@@ -154,7 +231,7 @@ const Features = () => {
                 src={item.Icon}
                 alt={item.Feature}
                 className="w-6 h-6 object-cover"
-                loading="lazy" // اضافه کردن Lazy Loading برای تصاویر
+                loading="lazy"
               />
               <span className="text-right text-[#202020] font-xregular text-[14px]">
                 {item.Feature}
@@ -164,9 +241,13 @@ const Features = () => {
               <input
                 type="checkbox"
                 className="toggle border-none bg-white [--tglbg:#CBCBCB] hover:[--tglbg:#44C0ED] hover:bg-white"
-                defaultChecked={item.enabled}
+                checked={item.enabled}
+                onChange={() => handleToggleFeature(startIndex + index)}
               />
-              <button className="text-gray-400">
+              <button 
+                className="text-gray-400"
+                onClick={() => handleDeleteFeature(startIndex + index)}
+              >
                 <LuTrash2 className="w-[22px] h-[22px] text-[#ADADAD]" />
               </button>
             </div>
@@ -178,7 +259,11 @@ const Features = () => {
           <form method="dialog">
             <button
               className="btn btn-sm btn-circle btn-ghost absolute left-3 top-2"
-              onClick={() => document.getElementById("my_modal_10")?.close()}
+              onClick={() => {
+                document.getElementById("my_modal_10")?.close();
+                reset();
+                fileRef.current = null;
+              }}
             >
               ✕
             </button>
@@ -230,30 +315,12 @@ const Features = () => {
         </div>
       </dialog>
       <div className="flex items-center mt-[35px] w-full">
-        <div className="w-3/12">
-          <span className="text-[#868686] font-xregular text-[12px]">
-            نمایش{" "}
-            <span className="text-[#202020] font-xbold">{features.length}</span>{" "}
-            از 68 نتیجه
-          </span>
-        </div>
-        <div className="join flex items-center justify-center w-full mr-[-190px] text-[14px] font-xregular gap-[9px]">
-          <button className="bg-[#EDEDED] p-[6px] rounded-[6.67px]">
-            <IoIosArrowForward className="w-4 h-4 text-[#606060] rounded-[4px]" />
-          </button>
-          <button className="bg-[#F1F8FF] px-[10.8px] py-[2.8px] rounded-[6.67px]">
-            1
-          </button>
-          <button className="bg-[#F1F8FF] px-[10.8px] py-[2.8px] rounded-[6.67px]">
-            2
-          </button>
-          <button className="bg-[#F1F8FF] px-[10.8px] py-[2.8px] rounded-[6.67px]">
-            3
-          </button>
-          <button className="bg-[#EDEDED] p-[6px] rounded-[6.67px]">
-            <IoIosArrowBack className="w-4 h-4 text-[#606060]" />
-          </button>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalItems={totalUsers}
+          pageSize={pageSize}
+          onPageChange={handlePageChange}
+        />
       </div>
     </div>
   );
