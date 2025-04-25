@@ -76,6 +76,7 @@ export default function Table({ ticketType }) {
 
   const handleOpenModal = async (ticket) => {
     try {
+      // به جای بازیابی وضعیت فعلی تیکت از سرور، می‌توانیم یک پارامتر includeMessages اضافه کنیم
       const response = await axios.get(
         `https://109.230.200.230:7890/api/v1/Admins/Tickets/${ticket.ticketId}/Messages`,
         {
@@ -91,6 +92,7 @@ export default function Table({ ticketType }) {
           hour: "2-digit",
           minute: "2-digit",
         }),
+        // اطمینان حاصل کنیم که فیلد fromAdmin به درستی تنظیم شده است در API
         sender: msg.fromAdmin ? "support" : "user",
         attachment: msg.hasAttachment ? msg.id : undefined,
       }));
@@ -105,12 +107,38 @@ export default function Table({ ticketType }) {
     }
   };
 
+  // در Table.js، بعد از بستن تیکت یا مدال
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedTicket(null);
+    // به‌روزرسانی لیست تیکت‌ها
+    fetchTickets();
   };
 
-  const handleSendMessage = (ticketId: string, text: string) => {
+  const handleCloseTicket = async (ticketId) => {
+    try {
+      // ارسال درخواست API برای بستن تیکت
+      await axios.delete(
+        `https://109.230.200.230:7890/api/v1/Admins/Tickets/${ticketId}/Close`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      // بروزرسانی وضعیت تیکت در state
+      setSelectedTicket((prev) =>
+        prev ? { ...prev, status: "closed" } : null
+      );
+
+      // بروزرسانی لیست تیکت‌ها
+      fetchTickets();
+    } catch (error) {
+      console.error("خطا در بستن تیکت:", error);
+    }
+  };
+
+  const handleSendMessage = async (ticketId, text, sender) => {
+    // ابتدا پیام را به صورت موقت نمایش می‌دهیم
     setSelectedTicket((prev) =>
       prev
         ? {
@@ -118,23 +146,47 @@ export default function Table({ ticketType }) {
             messages: [
               ...prev.messages,
               {
-                id: `${prev.messages.length + 1}`,
+                id: `temp-${Date.now()}`, // ایجاد یک ID موقت
                 text,
                 time: new Date().toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
                 }),
-                sender: "support",
+                sender,
               },
             ],
           }
         : null
     );
-  };
 
-  const handleCloseTicket = (ticketId) => {
-    // Handle closing the ticket, you might want to update the state or call an API
-    console.log(`Closing ticket ${ticketId}`);
+    // اگر فرستنده ادمین است، پیام را به سرور ارسال می‌کنیم
+    if (sender === "support") {
+      try {
+        const formData = new FormData();
+        await axios.post(
+          `https://109.230.200.230:7890/api/v1/Admins/Tickets/${ticketId}/Messages?text=${encodeURIComponent(
+            text
+          )}`,
+          formData,
+          {
+            withCredentials: true,
+          }
+        );
+
+        // پس از ارسال موفق، تیکت‌ها را مجدداً بارگذاری می‌کنیم
+        // یا می‌توانیم فقط وضعیت تیکت را به "answered" تغییر دهیم
+        setTickets((prevTickets) =>
+          prevTickets.map((ticket) =>
+            ticket.ticketId === ticketId
+              ? { ...ticket, status: "answered" }
+              : ticket
+          )
+        );
+      } catch (error) {
+        console.error("خطا در ارسال پیام:", error);
+        // در صورت خطا، می‌توانیم پیام موقت را حذف کنیم یا به کاربر اطلاع دهیم
+      }
+    }
   };
 
   return (
@@ -236,7 +288,7 @@ export default function Table({ ticketType }) {
       {/* Modal */}
       {isModalOpen && selectedTicket && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-[16px] w-full max-w-[780px] mx-auto overflow-hidden ">
+          <div className="bg-white rounded-[16px] w-full max-w-[780px] mx-auto h-full max-h-[541px]  overflow-hidden ">
             <SupportTicket
               ticketId={selectedTicket.ticketId}
               ticketSubject={selectedTicket.method}
