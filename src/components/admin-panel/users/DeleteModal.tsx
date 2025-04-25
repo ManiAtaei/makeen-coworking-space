@@ -11,7 +11,7 @@ interface DeleteModalProps {
   userId: string; // اضافه کردن prop برای ID کاربر
 }
 
-const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, onClose, onConfirm, userName, userId }) => {
+const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, onClose, onConfirm, userName,  }) => {
   if (!isOpen) return null;
 
   return (

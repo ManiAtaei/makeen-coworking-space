@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import React, { useState } from "react";
-import { FiPhoneCall } from "react-icons/fi";
 import Login from "../Auth/Login";
 import Register from "../Auth/Register";
 import { IoCloseOutline } from "react-icons/io5";
@@ -11,9 +10,7 @@ import ResetPasswod from "../Auth/ResetPassword";
 
 type AuthStep = 1 | 2 | 3 | 4 | 5;
 
-interface AuthComponentProps {
-  setStep: React.Dispatch<React.SetStateAction<AuthStep>>;
-}
+
 
 export default function Navbar() {
   const titleHamberger = [

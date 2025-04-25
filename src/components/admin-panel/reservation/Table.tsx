@@ -1,10 +1,8 @@
-import React from "react";
-import { FieldErrors, useForm } from "react-hook-form";
+import React, { useState } from "react";
 import { LuUserRoundX } from "react-icons/lu";
 import { SlEye } from "react-icons/sl";
 import { IoClose } from "react-icons/io5";
-import { IoIosArrowForward } from "react-icons/io";
-import { IoIosArrowBack } from "react-icons/io";
+import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
 
 export default function Table({ setActivePage }) {
   const info = [
@@ -97,28 +95,10 @@ export default function Table({ setActivePage }) {
       number: "۰۹۱۲۹۸۷۶۵۴۳",
     },
   ];
-  const check = [
-    { id: 1, text: " پیامک " },
-    { id: 2, text: " اعلان " },
-    { id: 3, text: " ایمیل " },
-  ];
-  interface dataType {
-    username: string;
-    discription: string;
-  }
-  const form = useForm<dataType>({});
-  const {
-    handleSubmit,
-    formState: { errors },
-    register,
-  } = form;
 
-  const onSubmit = (data: dataType) => {
-    console.log(data);
-  };
-  const onErrorHandler = (error: FieldErrors) => {
-    console.log(error);
-  };
+  // State for ban confirmation modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div>
       <div className="overflow-x-auto">

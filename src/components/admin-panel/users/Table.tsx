@@ -1,9 +1,10 @@
 "use client"
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { LuUserRoundX } from "react-icons/lu";
 import { SlEye } from "react-icons/sl";
 import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
+import Image from "next/image";
 import DeleteModal from "./DeleteModal";
 
 interface UserData {
@@ -46,7 +47,6 @@ export default function Table({ onSelectUsers, userTypeFilter }: TableProps) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-
         const response = await axios.get<ApiResponse[]>(
           `https://109.230.200.230:7890/api/v1/Admins/Users?page=${currentPage}&pageSize=${pageSize}&userType=${userTypeFilter}&orderBy=CreationTime&sortOrder=DESC`,
           { withCredentials: true }
@@ -75,7 +75,7 @@ export default function Table({ onSelectUsers, userTypeFilter }: TableProps) {
                 };
 
                 profileImage = URL.createObjectURL(imageResponse.data);
-              } catch (imgError: any) {
+              } catch (imgError: AxiosError | Error) {
                 console.error(`خطا در دریافت عکس پروفایل کاربر ${item.id}: ${imgError.message}`);
               }
             }
@@ -98,21 +98,24 @@ export default function Table({ onSelectUsers, userTypeFilter }: TableProps) {
         // فرض می‌کنیم API تعداد کل کاربران را در هدر یا بدنه پاسخ برمی‌گرداند
         // اگر API تعداد کل را برمی‌گرداند، باید آن را اینجا تنظیم کنیم
         setTotalUsers(68); // این مقدار باید از API گرفته شود (برای مثال از هدر یا بدنه پاسخ)
-      } catch (error: any) {
-        setError(`خطا در بارگذاری داده‌ها: ${error.message}`);
+      } catch (error: AxiosError | Error | unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'خطای ناشناخته';
+        setError(`خطا در بارگذاری داده‌ها: ${errorMessage}`);
       }
     };
 
     fetchData();
 
+    // Clean up function
     return () => {
+      // Clean up blob URLs
       info.forEach((item) => {
         if (item.image.startsWith("blob:")) {
           URL.revokeObjectURL(item.image);
         }
       });
     };
-  }, [currentPage, userTypeFilter]); // هر بار که صفحه یا نوع کاربر تغییر کند، داده‌ها دوباره بارگذاری می‌شوند
+  }, [currentPage, userTypeFilter, pageSize]); // Added pageSize to dependency array
 
   const handleCheckboxChange = (id: string) => {
     setSelectedIds((prev) => {
@@ -141,8 +144,9 @@ export default function Table({ onSelectUsers, userTypeFilter }: TableProps) {
       setInfo((prevInfo) => prevInfo.filter((item) => item.id !== selectedUser.id));
       setIsModalOpen(false);
       setSelectedUser(null);
-    } catch (error: any) {
-      setError(`خطا در بن کردن کاربر: ${error.message}`);
+    } catch (error: AxiosError | Error | unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'خطای ناشناخته';
+      setError(`خطا در بن کردن کاربر: ${errorMessage}`);
       setIsModalOpen(false);
     }
   };
@@ -202,7 +206,13 @@ export default function Table({ onSelectUsers, userTypeFilter }: TableProps) {
                 <td>{item.row}</td>
                 <td>{item.date}</td>
                 <td className="flex items-center gap-2">
-                  <img src={item.image} alt="profile" className="w-6 h-6 object-cover rounded-full" />
+                  <Image 
+                    src={item.image} 
+                    alt="profile" 
+                    width={24} 
+                    height={24} 
+                    className="object-cover rounded-full" 
+                  />
                   <span>{item.name}</span>
                 </td>
                 <td>{item.email}</td>
